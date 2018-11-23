@@ -1,0 +1,1 @@
+INSERT INTO compte (id,nom,prenom) VALUES (1,'lulu','cat');
