@@ -1,8 +1,10 @@
 package fr.miage.m2.bankservice.controller;
 
 import fr.miage.m2.bankservice.model.Carte;
+import fr.miage.m2.bankservice.model.Operation;
 import fr.miage.m2.bankservice.proxy.CarteClient;
 import fr.miage.m2.bankservice.model.Compte;
+import fr.miage.m2.bankservice.proxy.OperationClient;
 import fr.miage.m2.bankservice.repository.CompteRepository;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -23,9 +25,12 @@ public class CompteController {
 
     private final CarteClient carteClient;
 
-    public CompteController(CompteRepository cr, CarteClient carteClient) {
+    private final OperationClient operationClient;
+
+    public CompteController(CompteRepository cr, CarteClient carteClient, OperationClient operationClient) {
         this.cr = cr;
         this.carteClient = carteClient;
+        this.operationClient = operationClient;
     }
 
     // GET one compte
@@ -46,6 +51,8 @@ public class CompteController {
         responseHeader.setLocation(linkTo(CompteController.class).slash(saved.getId()).toUri()); // La localisation (URI) de l'carte est un lien vers sa classe, ajoute un '/' et renvoi l'identifiant (cartes/123abc...)
         return new ResponseEntity<>(null, responseHeader, HttpStatus.CREATED);
     }
+    
+    ////// Cartes //////
 
     // GET cartes
     @GetMapping(value = "/{compteId}/cartes")
@@ -59,7 +66,7 @@ public class CompteController {
     public ResponseEntity<?> getCarte(@PathVariable("compteId") String compteId, @PathVariable("carteId") String carteId) {
         ResponseEntity<?> carte = carteClient.fetchCarte(compteId,carteId);
         return carte;
-        // TODO: fix error page if card doesn't exists (whitelabel error)
+        // TODO: fix error page if card doesn't exist (whitelabel error)
     }
 
     // POST new carte
@@ -91,6 +98,37 @@ public class CompteController {
         // TODO
         ResponseEntity<?> res = carteClient.deleteCarte(compteId,id);
         return res;
+    }
+
+    ////// Operations //////
+
+    // GET operations
+    @GetMapping(value = "/{compteId}/operations")
+    public ResponseEntity<?> getAllOperations(@PathVariable("compteId") String compteId) {
+        ResponseEntity<?> operations = operationClient.fetchOperations(compteId);
+        return operations;
+    }
+
+    // GET one operation
+    @GetMapping(value = "/{compteId}/operations/{operationId}")
+    public ResponseEntity<?> getOperation(@PathVariable("compteId") String compteId, @PathVariable("operationId") String operationId) {
+        ResponseEntity<?> operation = operationClient.fetchOperation(compteId,operationId);
+        return operation;
+        // TODO: fix error page if operation doesn't exist (whitelabel error)
+    }
+
+    // POST new operation
+    @PostMapping(value = "/{compteId}/operations")
+    public ResponseEntity<?> newOperation(@PathVariable("compteId") String compteId, @RequestBody Operation operation) {
+        HttpEntity<Operation> test = new HttpEntity<>(operation);
+        ResponseEntity<?> res = operationClient.postOperation(compteId,test);
+        return res;
+    }
+
+    // GET solde
+    @GetMapping(value = "/{compteId}/solde")
+    public ResponseEntity<?> getSolde(@PathVariable("compteId") String compteId) {
+        return operationClient.getSolde(compteId);
     }
 
     // Méthodes "ToRessource"

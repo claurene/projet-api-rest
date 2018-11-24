@@ -2,8 +2,8 @@ package fr.miage.m2.bankservice.proxy;
 
 import fr.miage.m2.bankservice.controller.CompteController;
 import fr.miage.m2.bankservice.model.Carte;
+import fr.miage.m2.bankservice.proxy.config.CarteConfig;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
