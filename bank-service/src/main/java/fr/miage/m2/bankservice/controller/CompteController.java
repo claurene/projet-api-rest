@@ -6,14 +6,12 @@ import fr.miage.m2.bankservice.model.Compte;
 import fr.miage.m2.bankservice.repository.CompteRepository;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
@@ -30,7 +28,7 @@ public class CompteController {
         this.carteClient = carteClient;
     }
 
-    // GET one
+    // GET one compte
     @GetMapping(value = "/{compteId}")
     public ResponseEntity<?> getCompte(@PathVariable("compteId") String compteId) {
         return Optional.ofNullable(cr.findById(compteId))
@@ -39,7 +37,15 @@ public class CompteController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    //TODO post compte !
+    // POST compte
+    @PostMapping
+    public ResponseEntity<?> newCompte(@RequestBody Compte compte) {
+        compte.setId(UUID.randomUUID().toString()); // Donne un nouvel identifiant
+        Compte saved = cr.save(compte); // Fait persister l'carte
+        HttpHeaders responseHeader = new HttpHeaders(); // Génère un nouveau header pour la réponse
+        responseHeader.setLocation(linkTo(CompteController.class).slash(saved.getId()).toUri()); // La localisation (URI) de l'carte est un lien vers sa classe, ajoute un '/' et renvoi l'identifiant (cartes/123abc...)
+        return new ResponseEntity<>(null, responseHeader, HttpStatus.CREATED);
+    }
 
     // GET cartes
     @GetMapping(value = "/{compteId}/cartes")
