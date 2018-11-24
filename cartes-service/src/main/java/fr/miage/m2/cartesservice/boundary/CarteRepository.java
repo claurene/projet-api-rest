@@ -7,7 +7,9 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import java.util.Optional;
 
 @RepositoryRestResource(collectionResourceRel = "cartes")
-public interface CarteRepository extends JpaRepository<Carte,Long> {
-    Iterable<Carte> findAllByCompteid(Long id);
-    Optional<Carte> findByIdAndCompteid(Long id, Long compteid);
+public interface CarteRepository extends JpaRepository<Carte,String> {
+    Iterable<Carte> findAllByCompteid(String id);
+    Optional<Carte> findByIdAndCompteid(String id, String compteid);
+
+    Boolean existsByIdAndCompteid(String id, String compteid);
 }

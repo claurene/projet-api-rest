@@ -30,15 +30,16 @@ public class CarteController {
 
     // GET all (by compte ID)
     @GetMapping
-    public ResponseEntity<?> getAllCartesByCompteId(@PathVariable("compteId") Long compteId) {
+    public ResponseEntity<?> getAllCartesByCompteId(@PathVariable("compteId") String compteId) {
         Iterable<Carte> allCartes = cr.findAllByCompteid(compteId);
-        return new ResponseEntity<>(carteToResource(allCartes,compteId), HttpStatus.OK);
+        return new ResponseEntity<>(allCartes, HttpStatus.OK);
+        // TODO: fix carteToResource(allCartes,compteId) for standalone mode
     }
 
 
     // GET one
     @GetMapping(value = "/{carteId}")
-    public ResponseEntity<?> getCarte(@PathVariable("compteId") Long compteId, @PathVariable("carteId") Long id) {
+    public ResponseEntity<?> getCarte(@PathVariable("compteId") String compteId, @PathVariable("carteId") String id) {
         return Optional.ofNullable(cr.findByIdAndCompteid(id,compteId))
                 .filter(Optional::isPresent)
                 .map(i -> new ResponseEntity<>(carteToResource(i.get(), true,compteId), HttpStatus.OK))
@@ -47,8 +48,8 @@ public class CarteController {
 
     // POST (create)
     @PostMapping
-    public ResponseEntity<?> newCarte(@PathVariable("compteId") Long compteId, @RequestBody Carte carte) {
-        //carte.setId(UUID.randomUUID().toString()); // Donne un nouvel identifiant
+    public ResponseEntity<?> newCarte(@PathVariable("compteId") String compteId, @RequestBody Carte carte) {
+        carte.setId(UUID.randomUUID().toString()); // Donne un nouvel identifiant
         carte.setCompteId(compteId);
         Carte saved = cr.save(carte); // Fait persister l'carte
         HttpHeaders responseHeader = new HttpHeaders(); // Génère un nouveau header pour la réponse
@@ -56,9 +57,37 @@ public class CarteController {
         return new ResponseEntity<>(null, responseHeader, HttpStatus.CREATED);
     }
 
+    // PUT (update)
+    // TODO: changer méthode ? pcq là ça remplace tout donc bof secure + champs null si pas toutes les infos sont envoyées -> PATCH ?
+    @PutMapping(value="/{carteId}")
+    public ResponseEntity<?> putCarte(@RequestBody Carte carte, @PathVariable("compteId") String compteId, @PathVariable("carteId") String id) {
+        // On change l'id afin de remplacer l'objet
+        Optional<Carte> body = Optional.ofNullable(carte);
+        if (!body.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // N'est pas créé si il n'existe pas
+        }
+        if (!cr.existsByIdAndCompteid(id,compteId)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        carte.setId(id);
+        carte.setCompteId(compteId);
+        Carte saved = cr.save(carte);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // DELETE
+    @DeleteMapping(value="/{carteId}")
+    public ResponseEntity<?> deleteCarte(@PathVariable("compteId") String compteId, @PathVariable("carteId") String id) {
+        Optional<Carte> carte = cr.findByIdAndCompteid(id,compteId);
+        if (carte.isPresent()) {
+            cr.delete(carte.get());
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     // Méthodes ToResource
 
-    private Resources<Resource<Carte>> carteToResource(Iterable<Carte> cartes, Long compteId) {
+    private Resources<Resource<Carte>> carteToResource(Iterable<Carte> cartes, String compteId) {
         Link selfLink = linkTo(methodOn(CarteController.class).getAllCartesByCompteId(compteId)).withSelfRel();
         // Liens référencant chaque carte dans la collection
         List<Resource<Carte>> carteResources = new ArrayList<>();
@@ -67,7 +96,7 @@ public class CarteController {
         return new Resources<>(carteResources, selfLink);
     }
 
-    private Resource<Carte> carteToResource(Carte carte, Boolean collection, Long compteId) {
+    private Resource<Carte> carteToResource(Carte carte, Boolean collection, String compteId) {
         Link selfLink = linkTo(CarteRepository.class)
                 .slash(carte.getId()) //TODO: fix
                 .withSelfRel();

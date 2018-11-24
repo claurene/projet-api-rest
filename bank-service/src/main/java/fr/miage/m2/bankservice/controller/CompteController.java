@@ -32,32 +32,58 @@ public class CompteController {
 
     // GET one
     @GetMapping(value = "/{compteId}")
-    public ResponseEntity<?> getCompte(@PathVariable("compteId") Long compteId) {
+    public ResponseEntity<?> getCompte(@PathVariable("compteId") String compteId) {
         return Optional.ofNullable(cr.findById(compteId))
                 .filter(Optional::isPresent)
                 .map(i -> new ResponseEntity<>(compteToResource(i.get(), true), HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    //TODO post compte !
+
     // GET cartes
     @GetMapping(value = "/{compteId}/cartes")
-    public ResponseEntity<?> getAllCartes(@PathVariable("compteId") Long compteId) {
-        ResponseEntity<?> cartes = carteClient.fetchCartes(compteId.toString());
+    public ResponseEntity<?> getAllCartes(@PathVariable("compteId") String compteId) {
+        ResponseEntity<?> cartes = carteClient.fetchCartes(compteId);
         return cartes;
     }
 
     // GET one carte
     @GetMapping(value = "/{compteId}/cartes/{carteId}")
-    public ResponseEntity<?> getCarte(@PathVariable("compteId") Long compteId, @PathVariable("carteId") Long carteId) {
-        ResponseEntity<?> carte = carteClient.fetchCarte(compteId.toString(),carteId.toString());
+    public ResponseEntity<?> getCarte(@PathVariable("compteId") String compteId, @PathVariable("carteId") String carteId) {
+        ResponseEntity<?> carte = carteClient.fetchCarte(compteId,carteId);
         return carte;
+        // TODO: fix error page if card doesn't exists (whitelabel error)
     }
 
     // POST new carte
     @PostMapping(value = "/{compteId}/cartes")
-    public ResponseEntity<?> newCarte(@PathVariable("compteId") Long compteId, @RequestBody Carte carte) {
+    public ResponseEntity<?> newCarte(@PathVariable("compteId") String compteId, @RequestBody Carte carte) {
         HttpEntity<Carte> test = new HttpEntity<>(carte);
-        ResponseEntity<?> res = carteClient.postCarte(compteId.toString(),test);
+        ResponseEntity<?> res = carteClient.postCarte(compteId,test);
+        return res;
+    }
+
+    // PUT update carte
+    @PutMapping(value="/{compteId}/cartes/{carteId}")
+    public ResponseEntity<?> putCarte(@RequestBody Carte carte, @PathVariable("compteId") String compteId, @PathVariable("carteId") String id) {
+        /*if (!body.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // N'est pas créé si il n'existe pas
+        }
+        if (!cr.existsByIdAndCompteid(id,compteId)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }*/
+        //TODO
+        HttpEntity<Carte> test = new HttpEntity<>(carte);
+        ResponseEntity<?> res = carteClient.putCarte(compteId,id,test);
+        return res;
+    }
+
+    // DELETE carte
+    @DeleteMapping(value="/{compteId}/cartes/{carteId}")
+    public ResponseEntity<?> deleteCarte(@PathVariable("compteId") String compteId, @PathVariable("carteId") String id) {
+        // TODO
+        ResponseEntity<?> res = carteClient.deleteCarte(compteId,id);
         return res;
     }
 

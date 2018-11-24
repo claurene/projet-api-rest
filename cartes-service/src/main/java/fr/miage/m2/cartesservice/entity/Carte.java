@@ -1,5 +1,7 @@
 package fr.miage.m2.cartesservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -8,29 +10,28 @@ import java.io.Serializable;
 @Entity
 public class Carte {
     @Id
-    @GeneratedValue
-    private Long id;
+    private String id;
 
     private String numcarte;
     private String code;
     //TODO: à completer
 
-    private Long compteid;
+    private String compteid;
 
     public Carte() {
     }
 
-    public Carte(String numcarte, String code, Long compteId) {
+    public Carte(String numcarte, String code, String compteId) {
         this.numcarte = numcarte;
         this.code = code;
         this.compteid = compteId;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -50,11 +51,11 @@ public class Carte {
         this.code = code;
     }
 
-    public Long getCompteId() {
+    public String getCompteId() {
         return compteid;
     }
 
-    public void setCompteId(Long compteId) {
+    public void setCompteId(String compteId) {
         this.compteid = compteId;
     }
 

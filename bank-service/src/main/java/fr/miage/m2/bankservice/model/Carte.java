@@ -1,19 +1,23 @@
 package fr.miage.m2.bankservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Carte {
+    private final String id;
     private final String numcarte;
     private final String code;
     //TODO: à completer
 
-    private final Long compteid;
+    private final String compteid;
 
     @JsonCreator
-    public Carte(@JsonProperty("numcarte") String numcarte,
+    public Carte(@JsonProperty("id") String id,
+                 @JsonProperty("numcarte") String numcarte,
                  @JsonProperty("code") String code,
-                 @JsonProperty("compteId") Long compteid) {
+                 @JsonProperty("compteId") String compteid) {
+        this.id = id;
         this.numcarte = numcarte;
         this.code = code;
         this.compteid = compteid;
@@ -27,7 +31,12 @@ public class Carte {
         return code;
     }
 
-    public Long getCompteid() {
+    public String getCompteid() {
         return compteid;
+    }
+
+    @JsonIgnore
+    public String getId() {
+        return id;
     }
 }
