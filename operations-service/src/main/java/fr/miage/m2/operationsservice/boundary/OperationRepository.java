@@ -13,7 +13,15 @@ public interface OperationRepository extends JpaRepository<Operation,String> {
     Iterable<Operation> findAllByCompteid(String id);
     Optional<Operation> findByIdAndCompteid(String id, String compteid);
 
-    // SELECT SUM(montant) FROM operations WHERE compteid=id;
     @Query("SELECT SUM(o.montant) FROM Operation o WHERE o.compteid = :compteid")
     String findSoldeByCompteid(@Param("compteid") String compteid);
+
+    @Query("SELECT o FROM Operation o WHERE o.compteid = :compteid " +
+            "AND (:cat is null or o.categorie = :cat)" +
+            "AND (:com is null or o.commercant = :com)" +
+            "AND (:pays is null or o.pays = :pays)")
+    Iterable<Operation> findAllByFiltering(@Param("compteid") String compteid,
+                                           @Param("cat") String cat,
+                                           @Param("com") String com,
+                                           @Param("pays") String pays);
 }

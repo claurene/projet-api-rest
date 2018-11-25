@@ -102,10 +102,13 @@ public class CompteController {
 
     ////// Operations //////
 
-    // GET operations
+    // GET operations (?categorie,commercant,pays)
     @GetMapping(value = "/{compteId}/operations")
-    public ResponseEntity<?> getAllOperations(@PathVariable("compteId") String compteId) {
-        ResponseEntity<?> operations = operationClient.fetchOperations(compteId);
+    public ResponseEntity<?> getAllOperations(@PathVariable("compteId") String compteId,
+                                              @RequestParam("categorie") Optional<String> categorie,
+                                              @RequestParam("commercant") Optional<String> commercant,
+                                              @RequestParam("pays") Optional<String> pays ) {
+        ResponseEntity<?> operations = operationClient.fetchOperations(compteId,categorie,commercant,pays);
         return operations;
     }
 

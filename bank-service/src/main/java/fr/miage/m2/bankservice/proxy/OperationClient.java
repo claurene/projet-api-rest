@@ -14,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -34,9 +36,25 @@ public class OperationClient {
 
     // GET all operations
     // TODO: filter parameter
-    public ResponseEntity<?> fetchOperations(String compteId){
+    public ResponseEntity<?> fetchOperations(String compteId,
+                                             Optional<String> categorie,
+                                             Optional<String> commercant,
+                                             Optional<String> pays){
         //TODO: fix liens HATEOAS
-        Operation[] res = this.restTemplate.getForObject(OPERATIONS_URL,Operation[].class,compteId);
+        // Filtering
+        ArrayList<String> params = new ArrayList<>();
+        if (categorie.isPresent()) {
+            params.add("categorie="+categorie.get());
+        }
+        if (commercant.isPresent()) {
+            params.add("commercant="+commercant.get());
+        }
+        if (pays.isPresent()) {
+            params.add("pays="+pays.get());
+        }
+        String url = OPERATIONS_URL+"?";
+        url+= params.stream().collect(Collectors.joining("&"));
+        Operation[] res = this.restTemplate.getForObject(url,Operation[].class,compteId);
         return new ResponseEntity<>(operationsToResource(res,compteId), HttpStatus.OK);
     }
 
@@ -67,7 +85,7 @@ public class OperationClient {
     }
 
     private Resources<?> operationsToResource(Operation[] operations, String compteId) {
-        Link selfLink = linkTo(methodOn(CompteController.class).getAllOperations(compteId)).withSelfRel();
+        Link selfLink = linkTo(methodOn(CompteController.class).getAllOperations(compteId,null,null,null)).withSelfRel();
         List<Resource<?>> res = new ArrayList();
         Arrays.asList(operations).forEach(c -> res.add(operationToResource(c,compteId,c.getId())));
         return new Resources<>(res,selfLink);

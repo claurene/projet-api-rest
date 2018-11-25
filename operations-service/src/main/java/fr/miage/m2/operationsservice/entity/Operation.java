@@ -10,6 +10,9 @@ public class Operation {
 
     private String libelle;
     private float montant;
+    private String categorie;
+    private String commercant;
+    private String pays;
     //TODO: à completer
 
     private String compteid;
@@ -17,9 +20,12 @@ public class Operation {
     public Operation() {
     }
 
-    public Operation(String libelle, float montant, String compteid) {
+    public Operation(String libelle, float montant, String categorie, String commercant, String pays, String compteid) {
         this.libelle = libelle;
         this.montant = montant;
+        this.categorie = categorie;
+        this.commercant = commercant;
+        this.pays = pays;
         this.compteid = compteid;
     }
 
@@ -53,5 +59,29 @@ public class Operation {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getCategorie() {
+        return categorie;
+    }
+
+    public void setCategorie(String categorie) {
+        this.categorie = categorie;
+    }
+
+    public String getCommercant() {
+        return commercant;
+    }
+
+    public void setCommercant(String commercant) {
+        this.commercant = commercant;
+    }
+
+    public String getPays() {
+        return pays;
+    }
+
+    public void setPays(String pays) {
+        this.pays = pays;
     }
 }

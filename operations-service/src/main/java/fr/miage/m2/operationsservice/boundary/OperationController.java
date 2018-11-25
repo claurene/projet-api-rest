@@ -10,10 +10,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -29,10 +28,17 @@ public class OperationController {
     }
 
     // GET all (by compte ID)
-    //TODO: add filter
-    @GetMapping
-    public ResponseEntity<?> getAllOperationsByCompteId(@PathVariable("compteId") String compteId) {
-        Iterable<Operation> allOperations = or.findAllByCompteid(compteId);
+    @GetMapping //(params = {"categorie","commercant","pays"})
+    public ResponseEntity<?> getAllOperationsByCompteId(@PathVariable("compteId") String compteId,
+                                                        @RequestParam("categorie") Optional<String> categorie,
+                                                        @RequestParam("commercant") Optional<String> commercant,
+                                                        @RequestParam("pays") Optional<String> pays ) {
+        // Filtering
+        Iterable<Operation> allOperations = or.findAllByFiltering(compteId,
+                (categorie.isPresent() ? categorie.get() : null),
+                (commercant.isPresent() ? commercant.get() : null),
+                (pays.isPresent() ? pays.get() : null));
+        //Iterable<Operation> allOperations = or.findAllByCompteid(compteId);
         return new ResponseEntity<>(allOperations, HttpStatus.OK);
         // TODO: fix operationToResource(allOperations,compteId) for standalone mode
     }
@@ -42,7 +48,7 @@ public class OperationController {
     public ResponseEntity<?> getOperation(@PathVariable("compteId") String compteId, @PathVariable("operationId") String id) {
         return Optional.ofNullable(or.findByIdAndCompteid(id,compteId))
                 .filter(Optional::isPresent)
-                .map(i -> new ResponseEntity<>(operationToResource(i.get(), true,compteId), HttpStatus.OK))
+                .map(i -> new ResponseEntity<>(operationToResource(i.get(), false,compteId), HttpStatus.OK)) //TODO: collection rel link parent
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -68,7 +74,7 @@ public class OperationController {
     // Méthodes ToResource
 
     private Resources<Resource<Operation>> operationToResource(Iterable<Operation> operations, String compteId) {
-        Link selfLink = linkTo(methodOn(OperationController.class).getAllOperationsByCompteId(compteId)).withSelfRel();
+        Link selfLink = linkTo(methodOn(OperationController.class).getAllOperationsByCompteId(compteId,null,null,null)).withSelfRel();
         // Liens référencant chaque operation dans la collection
         List<Resource<Operation>> operationResources = new ArrayList<>();
         operations.forEach(operation ->
@@ -81,7 +87,7 @@ public class OperationController {
                 .slash(operation.getId()) //TODO: fix
                 .withSelfRel();
         if (collection) {
-            Link collectionLink = linkTo(methodOn(OperationController.class).getAllOperationsByCompteId(compteId)).withSelfRel();
+            Link collectionLink = linkTo(methodOn(OperationController.class).getAllOperationsByCompteId(compteId,null,null,null)).withSelfRel();
             return new Resource<>(operation, selfLink, collectionLink);
         } else {
             return new Resource<>(operation, selfLink);
