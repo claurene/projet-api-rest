@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.math.BigDecimal;
+
 public class Operation {
     private final String id;
     private String dateheure;
@@ -12,7 +14,7 @@ public class Operation {
     private String commercant;
     private String categorie;
     private String pays;
-    //TODO: taux
+    private BigDecimal taux;
 
     private final String compteid;
 
@@ -24,6 +26,7 @@ public class Operation {
                      @JsonProperty("commercant") String commercant,
                      @JsonProperty("categorie") String categorie,
                      @JsonProperty("pays") String pays,
+                     @JsonProperty("taux") BigDecimal taux,
                      @JsonProperty("compteId") String compteid) {
         this.id = id;
         this.dateheure = dateheure;
@@ -32,6 +35,7 @@ public class Operation {
         this.commercant = commercant;
         this.categorie = categorie;
         this.pays = pays;
+        this.taux = taux;
         this.compteid = compteid;
     }
 
@@ -66,5 +70,37 @@ public class Operation {
     @JsonIgnore
     public String getId() {
         return id;
+    }
+
+    public BigDecimal getTaux() {
+        return taux;
+    }
+
+    public void setDateheure(String dateheure) {
+        this.dateheure = dateheure;
+    }
+
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
+    }
+
+    public void setMontant(float montant) {
+        this.montant = montant;
+    }
+
+    public void setCommercant(String commercant) {
+        this.commercant = commercant;
+    }
+
+    public void setCategorie(String categorie) {
+        this.categorie = categorie;
+    }
+
+    public void setPays(String pays) {
+        this.pays = pays;
+    }
+
+    public void setTaux(BigDecimal taux) {
+        this.taux = taux;
     }
 }

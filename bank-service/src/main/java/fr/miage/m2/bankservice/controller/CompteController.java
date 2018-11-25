@@ -2,16 +2,19 @@ package fr.miage.m2.bankservice.controller;
 
 import fr.miage.m2.bankservice.model.Carte;
 import fr.miage.m2.bankservice.model.Operation;
+import fr.miage.m2.bankservice.proxy.BourseClient;
 import fr.miage.m2.bankservice.proxy.CarteClient;
 import fr.miage.m2.bankservice.model.Compte;
 import fr.miage.m2.bankservice.proxy.OperationClient;
 import fr.miage.m2.bankservice.repository.CompteRepository;
+import fr.miage.m2.bankservice.repository.PaysDeviseRepository;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,14 +27,20 @@ public class CompteController {
 
     private final CompteRepository cr;
 
+    private final PaysDeviseRepository pdr;
+
     private final CarteClient carteClient;
 
     private final OperationClient operationClient;
 
-    public CompteController(CompteRepository cr, CarteClient carteClient, OperationClient operationClient) {
+    private final BourseClient bourseClient;
+
+    public CompteController(CompteRepository cr, PaysDeviseRepository pdr, CarteClient carteClient, OperationClient operationClient, BourseClient bourseClient) {
         this.cr = cr;
+        this.pdr = pdr;
         this.carteClient = carteClient;
         this.operationClient = operationClient;
+        this.bourseClient = bourseClient;
     }
 
     // GET one compte
@@ -124,6 +133,18 @@ public class CompteController {
     // POST new operation
     @PostMapping(value = "/{compteId}/operations")
     public ResponseEntity<?> newOperation(@PathVariable("compteId") String compteId, @RequestBody Operation operation) {
+        //TODO: taux
+        Compte c1 = cr.findById(compteId).get(); //TODO: getForObjet + if present
+        if (c1.getPays().equals(operation.getPays())) {
+            // Pas de taux
+            operation.setTaux(new BigDecimal(0));
+        } else {
+            // TODO: vérif + clean + secure
+            String source = pdr.findByPays(operation.getPays()).get().getDevise();
+            String cible = pdr.findByPays(c1.getPays()).get().getDevise();
+            operation.setTaux(bourseClient.getValeurDeChange(source,cible));
+            operation.setMontant(Float.parseFloat(bourseClient.getMontant(source,cible,BigDecimal.valueOf(operation.getMontant())).toString()));
+        }
         HttpEntity<Operation> test = new HttpEntity<>(operation);
         ResponseEntity<?> res = operationClient.postOperation(compteId,test);
         return res;
@@ -141,6 +162,7 @@ public class CompteController {
         Compte c1 = cr.findById(compteId).get(); //TODO: getForObjet + if present
         Compte c2 = cr.findByIban(payload.get("IBAN")).get(); //TODO check both conditions
         // TODO: check + secure
+        // TODO: taux
         Operation o1 = new Operation(
                 "dummy",
                 payload.get("dateheure"),
@@ -149,6 +171,7 @@ public class CompteController {
                 payload.get("IBAN"),
                 "transfert",
                 c1.getPays(),
+                new BigDecimal(100),
                 "dummy"
         );
         ResponseEntity<?> res1 = operationClient.postOperation(compteId,new HttpEntity<>(o1));
@@ -160,6 +183,7 @@ public class CompteController {
                 c1.getIban(),
                 "transfert",
                 c1.getPays(),
+                new BigDecimal(100),
                 "dummy"
         );
         ResponseEntity<?> res2 = operationClient.postOperation(c2.getId(),new HttpEntity<>(o2));

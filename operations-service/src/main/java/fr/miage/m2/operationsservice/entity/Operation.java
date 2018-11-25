@@ -2,6 +2,7 @@ package fr.miage.m2.operationsservice.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.math.BigDecimal;
 
 @Entity
 public class Operation {
@@ -11,7 +12,7 @@ public class Operation {
     private String dateheure;
     private String libelle;
     private float montant;
-    //private String taux; //TODO: fix
+    private BigDecimal taux;
     private String commercant;
     private String categorie;
     private String pays;
@@ -21,10 +22,11 @@ public class Operation {
     public Operation() {
     }
 
-    public Operation(String dateheure, String libelle, float montant, String categorie, String commercant, String pays, String compteid) {
+    public Operation(String dateheure, String libelle, float montant, BigDecimal taux, String categorie, String commercant, String pays, String compteid) {
         this.dateheure = dateheure;
         this.libelle = libelle;
         this.montant = montant;
+        this.taux = taux;
         this.categorie = categorie;
         this.commercant = commercant;
         this.pays = pays;
@@ -93,5 +95,13 @@ public class Operation {
 
     public void setDateheure(String dateheure) {
         this.dateheure = dateheure;
+    }
+
+    public BigDecimal getTaux() {
+        return taux;
+    }
+
+    public void setTaux(BigDecimal taux) {
+        this.taux = taux;
     }
 }
