@@ -12,6 +12,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -133,6 +134,40 @@ public class CompteController {
     public ResponseEntity<?> getSolde(@PathVariable("compteId") String compteId) {
         return operationClient.getSolde(compteId);
     }
+
+    // POST transfert
+    @PostMapping(value = "/{compteId}/transfert")
+    public ResponseEntity<?> newTransfert(@PathVariable("compteId") String compteId, @RequestBody Map<String,String> payload) {
+        Compte c1 = cr.findById(compteId).get(); //TODO: getForObjet + if present
+        Compte c2 = cr.findByIban(payload.get("IBAN")).get(); //TODO check both conditions
+        // TODO: check + secure
+        Operation o1 = new Operation(
+                "dummy",
+                payload.get("dateheure"),
+                "transfert",
+                Float.parseFloat(payload.get("montant"))*-1,
+                payload.get("IBAN"),
+                "transfert",
+                c1.getPays(),
+                "dummy"
+        );
+        ResponseEntity<?> res1 = operationClient.postOperation(compteId,new HttpEntity<>(o1));
+        Operation o2 = new Operation(
+                "dummy",
+                payload.get("dateheure"),
+                "transfert",
+                Float.parseFloat(payload.get("montant")),
+                c1.getIban(),
+                "transfert",
+                c1.getPays(),
+                "dummy"
+        );
+        ResponseEntity<?> res2 = operationClient.postOperation(c2.getId(),new HttpEntity<>(o2));
+        // TODO: send correct answer
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    ///// Private /////
 
     // Méthodes "ToRessource"
     private Resource<Compte> compteToResource(Compte compte, Boolean collection) {

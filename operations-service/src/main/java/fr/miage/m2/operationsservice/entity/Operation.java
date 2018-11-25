@@ -8,19 +8,21 @@ public class Operation {
     @Id
     private String id;
 
+    private String dateheure;
     private String libelle;
     private float montant;
-    private String categorie;
+    //private String taux; //TODO: fix
     private String commercant;
+    private String categorie;
     private String pays;
-    //TODO: à completer
 
     private String compteid;
 
     public Operation() {
     }
 
-    public Operation(String libelle, float montant, String categorie, String commercant, String pays, String compteid) {
+    public Operation(String dateheure, String libelle, float montant, String categorie, String commercant, String pays, String compteid) {
+        this.dateheure = dateheure;
         this.libelle = libelle;
         this.montant = montant;
         this.categorie = categorie;
@@ -83,5 +85,13 @@ public class Operation {
 
     public void setPays(String pays) {
         this.pays = pays;
+    }
+
+    public String getDateheure() {
+        return dateheure;
+    }
+
+    public void setDateheure(String dateheure) {
+        this.dateheure = dateheure;
     }
 }
