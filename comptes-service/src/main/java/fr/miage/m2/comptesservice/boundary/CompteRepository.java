@@ -1,6 +1,7 @@
-package fr.miage.m2.bankservice.repository;
+package fr.miage.m2.comptesservice.boundary;
 
-import fr.miage.m2.bankservice.model.Compte;
+
+import fr.miage.m2.comptesservice.entity.Compte;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

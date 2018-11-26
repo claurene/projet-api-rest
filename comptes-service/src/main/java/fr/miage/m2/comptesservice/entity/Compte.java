@@ -1,57 +1,74 @@
-package fr.miage.m2.bankservice.model;
+package fr.miage.m2.comptesservice.entity;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.io.Serializable;
 
+@Entity
 public class Compte implements Serializable{
-    private final String id;
 
-    private final String nom;
-    private final String prenom;
-    private final String iban;
-    private final String pays;
+    @Id
+    @JsonProperty("id")
+    private String id;
+
+    private String nom;
+    private String prenom;
+    private String iban;
+    private String pays;
     // TODO : à complèter
 
-    @JsonCreator
-    public Compte(@JsonProperty("id") String id,
-                  @JsonProperty("nom") String nom,
-                  @JsonProperty("prenom") String prenom,
-                  @JsonProperty("iban") String iban,
-                  @JsonProperty("pays") String pays) {
-        this.id = id;
+    public Compte() {
+    }
+
+    public Compte(String nom, String prenom, String iban, String pays) {
         this.nom = nom;
         this.prenom = prenom;
         this.iban = iban;
         this.pays = pays;
     }
 
-    @JsonIgnore
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getNom() {
         return nom;
     }
 
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
 
     public String getPrenom() {
         return prenom;
     }
 
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
+    }
 
     public String getIban() {
         return iban;
     }
 
+    public void setIban(String iban) {
+        this.iban = iban;
+    }
 
     public String getPays() {
         return pays;
+    }
+
+    public void setPays(String pays) {
+        this.pays = pays;
     }
 
     @Override

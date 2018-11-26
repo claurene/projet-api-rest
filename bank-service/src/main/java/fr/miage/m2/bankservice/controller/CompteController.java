@@ -6,8 +6,8 @@ import fr.miage.m2.bankservice.model.PaysDevise;
 import fr.miage.m2.bankservice.proxy.BourseClient;
 import fr.miage.m2.bankservice.proxy.CarteClient;
 import fr.miage.m2.bankservice.model.Compte;
+import fr.miage.m2.bankservice.proxy.CompteClient;
 import fr.miage.m2.bankservice.proxy.OperationClient;
-import fr.miage.m2.bankservice.repository.CompteRepository;
 import fr.miage.m2.bankservice.repository.PaysDeviseRepository;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -29,17 +28,17 @@ public class CompteController {
 
     ///// Initialisation /////
 
-    private final CompteRepository cr;
     private final PaysDeviseRepository pdr;
 
     private final CarteClient carteClient;
+    private final CompteClient compteClient;
     private final OperationClient operationClient;
     private final BourseClient bourseClient;
 
-    public CompteController(CompteRepository cr, PaysDeviseRepository pdr, CarteClient carteClient, OperationClient operationClient, BourseClient bourseClient) {
-        this.cr = cr;
+    public CompteController(PaysDeviseRepository pdr, CarteClient carteClient, CompteClient compteClient, OperationClient operationClient, BourseClient bourseClient) {
         this.pdr = pdr;
         this.carteClient = carteClient;
+        this.compteClient = compteClient;
         this.operationClient = operationClient;
         this.bourseClient = bourseClient;
     }
@@ -49,20 +48,13 @@ public class CompteController {
     // GET one compte
     @GetMapping(value = "/{compteId}")
     public ResponseEntity<?> getCompte(@PathVariable("compteId") String compteId) {
-        return Optional.ofNullable(cr.findById(compteId))
-                .filter(Optional::isPresent)
-                .map(i -> new ResponseEntity<>(compteToResource(i.get()), HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return compteClient.fetchCompte(compteId);
     }
 
     // POST compte
     @PostMapping
     public ResponseEntity<?> newCompte(@RequestBody Compte compte) {
-        compte.setId(UUID.randomUUID().toString()); // Donne un nouvel identifiant
-        Compte saved = cr.save(compte); // Fait persister l'carte
-        HttpHeaders responseHeader = new HttpHeaders(); // Génère un nouveau header pour la réponse
-        responseHeader.setLocation(linkTo(CompteController.class).slash(saved.getId()).toUri()); // La localisation (URI) de l'carte est un lien vers sa classe, ajoute un '/' et renvoi l'identifiant (cartes/123abc...)
-        return new ResponseEntity<>(null, responseHeader, HttpStatus.CREATED);
+        return compteClient.postCompte(new HttpEntity<>(compte));
     }
     
     ////// Cartes //////
@@ -119,19 +111,15 @@ public class CompteController {
     public ResponseEntity<?> newOperation(@PathVariable("compteId") String compteId, @RequestBody Operation operation) {
         ResponseEntity<?> res;
 
-        Optional<Compte> opt = cr.findById(compteId);
-        if (opt.isPresent()) {
-            Compte c1 = opt.get();
-            // TODO: try catch, send 500 if not available ?
-            // TODO: send illegal argument exception / BAD REQUEST if pays not found ?
-            operation.setTaux(this.getTaux(operation.getPays(),c1.getPays()));
-            BigDecimal f =  this.getMontant(operation.getPays(),c1.getPays(),BigDecimal.valueOf(operation.getMontant()));
-            operation.setMontant(Float.valueOf(f.toString())); // TODO: change montant type ?
-            res = operationClient.postOperation(compteId,new HttpEntity<>(operation));
-        } else {
-            // TODO: 404
-            res = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        // TODO: empêche opération de fonctionner indépendement !
+        Compte c1 = compteClient.getCompteAsObject(compteId);
+        // TODO: check if exists, else 500/404 depending on taux (taux will change too)
+        operation.setTaux(this.getTaux(operation.getPays(),c1.getPays()));
+        BigDecimal f =  this.getMontant(operation.getPays(),c1.getPays(),BigDecimal.valueOf(operation.getMontant()));
+        operation.setMontant(Float.valueOf(f.toString())); // TODO: change montant type ?
+
+        res = operationClient.postOperation(compteId,new HttpEntity<>(operation));
+
         return res;
     }
 
@@ -144,57 +132,44 @@ public class CompteController {
     // POST transfert
     @PostMapping(value = "/{compteId}/transfert")
     public ResponseEntity<?> newTransfert(@PathVariable("compteId") String compteId, @RequestBody Map<String,String> payload) {
-        Optional<Compte> opt1 = cr.findById(compteId);
-        Optional<Compte> opt2 = cr.findByIban(payload.get("IBAN"));
-        if (opt1.isPresent() && opt2.isPresent()) {
-            Compte c1 = opt1.get();
-            Compte c2 = opt2.get();
-            // TODO: check operations avec if http reponse = created then...
-            Operation o1 = new Operation(
-                    "dummy",
-                    payload.get("dateheure"),
-                    "Transfert vers "+c2.getIban(),
-                    Float.parseFloat(payload.get("montant"))*-1,
-                    payload.get("IBAN"),
-                    "", // TODO: ?
-                    c1.getPays(),
-                    new BigDecimal(0),
-                    "dummy"
-            );
-            ResponseEntity<?> res1 = operationClient.postOperation(compteId,new HttpEntity<>(o1));
-            Operation o2 = new Operation(
-                    "dummy",
-                    payload.get("dateheure"),
-                    "Transfert de "+c1.getIban(),
-                    Float.parseFloat(String.valueOf(this.getMontant(c1.getPays(),c2.getPays(),new BigDecimal(payload.get("montant"))))), //TODO: à changer...
-                    c1.getIban(),
-                    "",
-                    c1.getPays(),
-                    this.getTaux(c1.getPays(),c2.getPays()),
-                    "dummy"
-            );
-            ResponseEntity<?> res2 = operationClient.postOperation(c2.getId(),new HttpEntity<>(o2));
-        } else {
-            // TODO: 404
-        }
-        // TODO: send correct answer
-        return new ResponseEntity<>(HttpStatus.OK);
+        Compte c1 = compteClient.getCompteAsObject(compteId);
+        String id2 = compteClient.getCompteIdByIban(payload.get("IBAN"));
+        Compte c2 = compteClient.getCompteAsObject(id2);
+        // TODO: check if exists else 404
+        // TODO: check operations avec if http reponse = created then...
+        // TODO: exec all at once !
+        Operation o1 = new Operation(
+                "dummy",
+                payload.get("dateheure"),
+                "Transfert vers "+c2.getIban(),
+                Float.parseFloat(payload.get("montant"))*-1,
+                payload.get("IBAN"),
+                "", // TODO: ?
+                c1.getPays(),
+                new BigDecimal(1),
+                "dummy"
+        );
+        // TODO: à faire fonctionner
+        float f =Float.parseFloat(String.valueOf(this.getMontant(c1.getPays(),c2.getPays(),new BigDecimal(payload.get("montant"))))); // TODO a changer
+        BigDecimal t = this.getTaux(c1.getPays(),c2.getPays());
+        ResponseEntity<?> res1 = operationClient.postOperation(compteId,new HttpEntity<>(o1));
+        Operation o2 = new Operation(
+                "dummy2",
+                payload.get("dateheure"),
+                "Transfert de "+c1.getIban(),
+                f,
+                c1.getIban(),
+                "",
+                c1.getPays(),
+                t,
+                "dummy"
+        );
+        ResponseEntity<?> res2 = operationClient.postOperation(id2,new HttpEntity<>(o2));
+        // TODO: send correct answer (headers = id ?)
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     ///// Private /////
-
-    // Méthodes "ToRessource"
-    private Resource<Compte> compteToResource(Compte compte) {
-        Link selfLink = linkTo(CompteRepository.class)
-                .slash(compte.getId())
-                .withSelfRel();
-        Resource res = new Resource<>(compte,selfLink);
-        res.add(linkTo(methodOn(CompteController.class).getAllCartes(compte.getId())).withRel("cartes"));
-        res.add(linkTo(methodOn(CompteController.class).getAllOperations(compte.getId(),null,null,null)).withRel("operations"));
-        res.add(linkTo(methodOn(CompteController.class).getSolde(compte.getId())).withRel("solde"));
-        res.add(linkTo(methodOn(CompteController.class).newTransfert(compte.getId(),null)).withRel("transfert")); // TODO: relevant ??
-        return res;
-    }
 
     private BigDecimal getTaux(String pays1, String pays2){
         BigDecimal taux = new BigDecimal(0);

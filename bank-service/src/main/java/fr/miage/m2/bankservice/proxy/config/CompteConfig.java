@@ -4,6 +4,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("bank.operations") // va chercher les informations dans application.properties
-public class OperationConfig extends Config {
+@ConfigurationProperties("bank.comptes")
+public class CompteConfig extends Config{
 }
