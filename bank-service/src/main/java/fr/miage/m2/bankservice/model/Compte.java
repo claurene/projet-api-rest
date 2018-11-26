@@ -13,21 +13,33 @@ public class Compte implements Serializable{
 
     private final String nom;
     private final String prenom;
-    private final String iban;
+    private final String datenaissance;
     private final String pays;
-    // TODO : à complèter
+    private final String nopassport;
+    private final String numtel;
+    private final String secret;
+    private final String iban;
+
 
     @JsonCreator
     public Compte(@JsonProperty("id") String id,
-                  @JsonProperty("nom") String nom,
-                  @JsonProperty("prenom") String prenom,
-                  @JsonProperty("iban") String iban,
-                  @JsonProperty("pays") String pays) {
+				 @JsonProperty("nom") String nom,
+				 @JsonProperty("prenom") String prenom,
+				 @JsonProperty("datenaissance") String datenaissance,
+				 @JsonProperty("pays") String pays,
+				 @JsonProperty("nopassport") String nopassport,
+				 @JsonProperty("numtel") String numtel,
+				 @JsonProperty("secret") String secret,
+				 @JsonProperty("iban") String iban) {
         this.id = id;
         this.nom = nom;
         this.prenom = prenom;
-        this.iban = iban;
+        this.datenaissance = datenaissance;
         this.pays = pays;
+        this.nopassport = nopassport;
+        this.numtel = numtel;
+        this.secret = secret;
+        this.iban = iban;
     }
 
     @JsonIgnore
@@ -54,14 +66,19 @@ public class Compte implements Serializable{
         return pays;
     }
 
-    @Override
-    public String toString() {
-        return "Compte{" +
-                "id='" + id + '\'' +
-                ", nom='" + nom + '\'' +
-                ", prenom='" + prenom + '\'' +
-                ", iban='" + iban + '\'' +
-                ", pays='" + pays + '\'' +
-                '}';
+    public String getDatenaissance() {
+        return datenaissance;
+    }
+
+    public String getNopassport() {
+        return nopassport;
+    }
+
+    public String getNumtel() {
+        return numtel;
+    }
+
+    public String getSecret() {
+        return secret;
     }
 }
