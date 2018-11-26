@@ -1,6 +1,6 @@
 package fr.miage.m2.bankservice.proxy;
 
-import fr.miage.m2.bankservice.controller.CompteController;
+import fr.miage.m2.bankservice.controller.BankController;
 import fr.miage.m2.bankservice.model.Carte;
 import fr.miage.m2.bankservice.proxy.config.CarteConfig;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -11,6 +11,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,11 +47,12 @@ public class CarteClient {
         return new ResponseEntity<>(carteToResource(carte,compteId,carteId),HttpStatus.OK);
     }
 
-    // TODO: check methods
-
     // POST one carte
     public ResponseEntity<?> postCarte (String compteId, HttpEntity<Carte> entity){
-        return this.restTemplate.postForEntity(CARTES_URL,entity,Carte.class,compteId);
+        URI uri = this.restTemplate.postForLocation(CARTES_URL,entity,Carte.class,compteId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(linkTo(BankController.class).slash(uri.getPath()).toUri());
+        return new ResponseEntity<>(null,headers,HttpStatus.CREATED);
     }
 
     // PUT one carte
@@ -67,15 +69,15 @@ public class CarteClient {
     }
 
     // Méthodes ToResource
-    // TODO add links with rel
+    // TODO add links with rel ?
 
     private Resource<?> carteToResource(Carte carte, String compteId, String carteId) {
-        Link selfLink = linkTo(methodOn(CompteController.class).getCarte(compteId,carteId)).withSelfRel();
+        Link selfLink = linkTo(methodOn(BankController.class).getCarte(compteId,carteId)).withSelfRel();
         return new Resource<>(carte, selfLink);
     }
 
     private Resources<?> cartesToResource(Carte[] cartes, String compteId) {
-        Link selfLink = linkTo(methodOn(CompteController.class).getAllCartes(compteId)).withSelfRel();
+        Link selfLink = linkTo(methodOn(BankController.class).getAllCartes(compteId)).withSelfRel();
         List<Resource<?>> res = new ArrayList();
         Arrays.asList(cartes).forEach(c -> res.add(carteToResource(c,compteId,c.getId())));
         return new Resources<>(res,selfLink);

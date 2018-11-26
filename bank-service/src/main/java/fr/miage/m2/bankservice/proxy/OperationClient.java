@@ -1,6 +1,6 @@
 package fr.miage.m2.bankservice.proxy;
 
-import fr.miage.m2.bankservice.controller.CompteController;
+import fr.miage.m2.bankservice.controller.BankController;
 import fr.miage.m2.bankservice.model.Operation;
 import fr.miage.m2.bankservice.proxy.config.OperationConfig;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -11,6 +11,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,32 +61,38 @@ public class OperationClient {
 
     // GET one operation
     public ResponseEntity<?> fetchOperation (String compteId, String operationId){
-        //return this.restTemplate.getForEntity(OPERATIONS_URL+"/{operationId}",Operation.class,compteId,operationId);
         Operation operation = this.restTemplate.getForObject(OPERATIONS_URL +"/{operationId}",Operation.class,compteId,operationId);
         return new ResponseEntity<>(operationToResource(operation,compteId,operationId),HttpStatus.OK);
     }
 
     // POST one operation
     public ResponseEntity<?> postOperation (String compteId, HttpEntity<Operation> entity){
-        return this.restTemplate.postForEntity(OPERATIONS_URL,entity,Operation.class,compteId);
+        URI uri = this.restTemplate.postForLocation(OPERATIONS_URL, entity, compteId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(linkTo(BankController.class).slash(uri.getPath()).toUri()); //TODO: remove '/comptes' from controller uri (or use another class)
+        return new ResponseEntity<>(null,headers,HttpStatus.CREATED);
     }
 
     // GET solde
     public ResponseEntity<?> getSolde (String compteId) {
-        // TODO: add HATEOAS links
+        // TODO: response entity + add HATEOAS links
         return this.restTemplate.getForEntity(OPERATIONS_URL + "/solde", String.class, compteId);
     }
 
     // Méthodes ToResource
-    // TODO add links with rel
 
     private Resource<?> operationToResource(Operation operation, String compteId, String operationId) {
-        Link selfLink = linkTo(methodOn(CompteController.class).getOperation(compteId,operationId)).withSelfRel();
+        Link selfLink = linkTo(methodOn(BankController.class).getOperation(compteId,operationId)).withSelfRel();
+        // TODO: voir si utile d'ajouter d'autres liens HATEOAS
+        /*Resource res = new Resource<>(operation, selfLink);
+        res.add(linkTo(methodOn(CompteController.class).getAllOperations(compteId,null,null,null)).withRel("operations"));
+        res.add(linkTo(methodOn(CompteController.class).getCompte(compteId)).withRel("compte"));
+        return res;*/
         return new Resource<>(operation, selfLink);
     }
 
     private Resources<?> operationsToResource(Operation[] operations, String compteId) {
-        Link selfLink = linkTo(methodOn(CompteController.class).getAllOperations(compteId,null,null,null)).withSelfRel();
+        Link selfLink = linkTo(methodOn(BankController.class).getAllOperations(compteId,null,null,null)).withSelfRel();
         List<Resource<?>> res = new ArrayList();
         Arrays.asList(operations).forEach(c -> res.add(operationToResource(c,compteId,c.getId())));
         return new Resources<>(res,selfLink);

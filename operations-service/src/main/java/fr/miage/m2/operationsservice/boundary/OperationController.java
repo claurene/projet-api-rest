@@ -38,9 +38,7 @@ public class OperationController {
                 (categorie.isPresent() ? categorie.get() : null),
                 (commercant.isPresent() ? commercant.get() : null),
                 (pays.isPresent() ? pays.get() : null));
-        //Iterable<Operation> allOperations = or.findAllByCompteid(compteId);
         return new ResponseEntity<>(allOperations, HttpStatus.OK);
-        // TODO: fix operationToResource(allOperations,compteId) for standalone mode
     }
 
     // GET one
@@ -48,7 +46,7 @@ public class OperationController {
     public ResponseEntity<?> getOperation(@PathVariable("compteId") String compteId, @PathVariable("operationId") String id) {
         return Optional.ofNullable(or.findByIdAndCompteid(id,compteId))
                 .filter(Optional::isPresent)
-                .map(i -> new ResponseEntity<>(operationToResource(i.get(), false,compteId), HttpStatus.OK)) //TODO: collection rel link parent
+                .map(i -> new ResponseEntity<>(i.get(), HttpStatus.OK)) 
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -59,13 +57,12 @@ public class OperationController {
         operation.setCompteid(compteId);
         Operation saved = or.save(operation); // Fait persister l'operation
         HttpHeaders responseHeader = new HttpHeaders(); // Génère un nouveau header pour la réponse
-        //TODO fix - responseHeader.setLocation(linkTo(OperationController.class).slash(saved.getId()).toUri()); // La localisation (URI) de l'operation est un lien vers sa classe, ajoute un '/' et renvoi l'identifiant (operations/123abc...)
+        responseHeader.setLocation(linkTo(methodOn(OperationController.class).getOperation(compteId,saved.getId())).toUri()); // La localisation (URI) de l'operation est un lien vers sa classe, ajoute un '/' et renvoi l'identifiant (operations/123abc...)
         return new ResponseEntity<>(null, responseHeader, HttpStatus.CREATED);
     }
 
     // GET solde
-    // TODO: responseEntity + HATEOAS
-    // TODO: round 2 decimales
+    // TODO: round 2 decimales ?
     @GetMapping(value = "/solde")
     public String getSolde(@PathVariable("compteId") String compteId) {
         return ""+or.findSoldeByCompteid(compteId);
@@ -73,7 +70,7 @@ public class OperationController {
 
     // Méthodes ToResource
 
-    private Resources<Resource<Operation>> operationToResource(Iterable<Operation> operations, String compteId) {
+    /*private Resources<Resource<Operation>> operationToResource(Iterable<Operation> operations, String compteId) {
         Link selfLink = linkTo(methodOn(OperationController.class).getAllOperationsByCompteId(compteId,null,null,null)).withSelfRel();
         // Liens référencant chaque operation dans la collection
         List<Resource<Operation>> operationResources = new ArrayList<>();
@@ -92,6 +89,6 @@ public class OperationController {
         } else {
             return new Resource<>(operation, selfLink);
         }
-    }
+    }*/
     
 }

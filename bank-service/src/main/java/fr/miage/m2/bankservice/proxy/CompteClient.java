@@ -1,16 +1,19 @@
 package fr.miage.m2.bankservice.proxy;
 
-import fr.miage.m2.bankservice.controller.CompteController;
+import fr.miage.m2.bankservice.controller.BankController;
 import fr.miage.m2.bankservice.model.Compte;
 import fr.miage.m2.bankservice.proxy.config.CompteConfig;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -29,7 +32,6 @@ public class CompteClient {
         this.COMPTES_URL = config.getUrl()+":"+config.getPort()+"/comptes";
     }
 
-    // TODO méthodes
     // GET one compte
     public ResponseEntity<?> fetchCompte (String compteId){
         Compte compte = getCompteAsObject(compteId);
@@ -37,7 +39,6 @@ public class CompteClient {
     }
 
     // GET compte as object
-    // TODO check if pertinent
     public Compte getCompteAsObject(String compteId) {
         return this.restTemplate.getForObject(COMPTES_URL+"/{compteId}",Compte.class,compteId);
     }
@@ -50,17 +51,20 @@ public class CompteClient {
 
     // POST one compte
     public ResponseEntity<?> postCompte (HttpEntity<Compte> entity){
-        return this.restTemplate.postForEntity(COMPTES_URL,entity,Compte.class);
+        URI uri = this.restTemplate.postForLocation(COMPTES_URL,entity);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(linkTo(BankController.class).slash(uri.getPath()).toUri());
+        return new ResponseEntity<>(null,headers,HttpStatus.CREATED);
     }
 
     // Méthodes "ToRessource"
     private Resource<Compte> compteToResource(Compte compte, String compteId) {
-        Link selfLink = linkTo(methodOn(CompteController.class).getCompte(compteId)).withSelfRel();
+        Link selfLink = linkTo(methodOn(BankController.class).getCompte(compteId)).withSelfRel();
         Resource res = new Resource<>(compte,selfLink);
-        res.add(linkTo(methodOn(CompteController.class).getAllCartes(compteId)).withRel("cartes"));
-        res.add(linkTo(methodOn(CompteController.class).getAllOperations(compteId,null,null,null)).withRel("operations"));
-        res.add(linkTo(methodOn(CompteController.class).getSolde(compteId)).withRel("solde"));
-        res.add(linkTo(methodOn(CompteController.class).newTransfert(compteId,null)).withRel("transfert")); // TODO: relevant ??
+        res.add(linkTo(methodOn(BankController.class).getAllCartes(compteId)).withRel("cartes"));
+        res.add(linkTo(methodOn(BankController.class).getAllOperations(compteId,null,null,null)).withRel("operations"));
+        res.add(linkTo(methodOn(BankController.class).getSolde(compteId)).withRel("solde"));
+        res.add(linkTo(methodOn(BankController.class).newTransfert(compteId,null)).withRel("transfert")); // TODO: relevant ??
         return res;
     }
 }

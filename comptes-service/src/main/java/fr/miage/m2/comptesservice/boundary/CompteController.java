@@ -56,7 +56,7 @@ public class CompteController {
         compte.setId(UUID.randomUUID().toString()); // Donne un nouvel identifiant
         Compte saved = cr.save(compte); // Fait persister le compte
         HttpHeaders responseHeader = new HttpHeaders(); // Génère un nouveau header pour la réponse
-        responseHeader.setLocation(linkTo(CompteController.class).slash(saved.getId()).toUri()); // La localisation (URI) de l'carte est un lien vers sa classe, ajoute un '/' et renvoi l'identifiant (cartes/123abc...)
+        responseHeader.setLocation(linkTo(methodOn(CompteController.class).getCompte(saved.getId())).toUri());
         return new ResponseEntity<>(null, responseHeader, HttpStatus.CREATED);
     }
 

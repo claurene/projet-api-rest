@@ -53,7 +53,7 @@ public class CarteController {
         carte.setCompteId(compteId);
         Carte saved = cr.save(carte); // Fait persister l'carte
         HttpHeaders responseHeader = new HttpHeaders(); // Génère un nouveau header pour la réponse
-        //TODO fix - responseHeader.setLocation(linkTo(CarteController.class).slash(saved.getId()).toUri()); // La localisation (URI) de l'carte est un lien vers sa classe, ajoute un '/' et renvoi l'identifiant (cartes/123abc...)
+        responseHeader.setLocation(linkTo(methodOn(CarteController.class).getCarte(compteId,saved.getId())).toUri());
         return new ResponseEntity<>(null, responseHeader, HttpStatus.CREATED);
     }
 
