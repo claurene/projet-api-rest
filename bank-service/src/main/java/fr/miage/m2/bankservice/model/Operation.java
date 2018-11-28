@@ -10,7 +10,7 @@ public class Operation {
     private final String id;
     private String dateheure;
     private String libelle;
-    private float montant;
+    private BigDecimal montant;
     private String commercant;
     private String categorie;
     private String pays;
@@ -22,7 +22,7 @@ public class Operation {
     public Operation(@JsonProperty("id") String id,
                      @JsonProperty("dateheure") String dateheure,
                      @JsonProperty("libelle") String libelle,
-                     @JsonProperty("montant") float montant,
+                     @JsonProperty("montant") BigDecimal montant,
                      @JsonProperty("commercant") String commercant,
                      @JsonProperty("categorie") String categorie,
                      @JsonProperty("pays") String pays,
@@ -43,7 +43,7 @@ public class Operation {
         return libelle;
     }
 
-    public float getMontant() {
+    public BigDecimal getMontant() {
         return montant;
     }
 
@@ -84,7 +84,7 @@ public class Operation {
         this.libelle = libelle;
     }
 
-    public void setMontant(float montant) {
+    public void setMontant(BigDecimal montant) {
         this.montant = montant;
     }
 

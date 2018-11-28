@@ -3,6 +3,7 @@ package fr.miage.m2.comptesservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -30,6 +31,7 @@ public class Compte {
     @NotNull
     private String secret;
     @NotNull
+    @Column(unique = true)
     private String iban;
 
     public Compte() {

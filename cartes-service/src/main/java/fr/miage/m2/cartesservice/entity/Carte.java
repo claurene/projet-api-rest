@@ -1,5 +1,6 @@
 package fr.miage.m2.cartesservice.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
@@ -13,6 +14,7 @@ public class Carte {
 
     @NotNull
     @Size(min=16,max=16)
+    @Column(unique = true)
     private String numcarte;
     @NotNull
     @Size(min=4,max=4)

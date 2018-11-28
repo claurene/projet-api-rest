@@ -46,7 +46,7 @@ public class BankController {
 
     ///// Comptes /////
 
-    // GET one compte
+    // GET one compte // TODO GET BY iban instead of ID ?
     @GetMapping(value = "/comptes/{compteId}")
     public ResponseEntity<?> getCompte(@PathVariable("compteId") String compteId) {
         return compteClient.fetchCompte(compteId);
@@ -66,7 +66,7 @@ public class BankController {
         return carteClient.fetchCartes(compteId);
     }
 
-    // GET one carte
+    // GET one carte // TODO GET BY numero instead of ID ?
     @GetMapping(value = "/comptes/{compteId}/cartes/{carteId}")
     public ResponseEntity<?> getCarte(@PathVariable("compteId") String compteId, @PathVariable("carteId") String carteId) {
         return carteClient.fetchCarte(compteId,carteId);
@@ -115,8 +115,8 @@ public class BankController {
             Compte c1 = compteClient.getCompteAsObject(compteId);
 
             operation.setTaux(this.getTaux(operation.getPays(),c1.getPays()));
-            BigDecimal f =  this.getMontant(operation.getPays(),c1.getPays(),BigDecimal.valueOf(operation.getMontant()));
-            operation.setMontant(Float.valueOf(f.toString())); // TODO: change montant type ?
+            BigDecimal f =  this.getMontant(operation.getPays(),c1.getPays(),operation.getMontant());
+            operation.setMontant(new BigDecimal(f.toString())); // TODO: change montant type ?
 
             return operationClient.postOperation(compteId,new HttpEntity<>(operation));
         } catch (HttpClientErrorException e) {
@@ -143,25 +143,23 @@ public class BankController {
                     "dummy",
                     payload.get("dateheure"),
                     "Transfert vers "+c2.getIban(),
-                    Float.parseFloat(payload.get("montant"))*-1,
+                    new BigDecimal(Float.parseFloat(payload.get("montant"))*-1),
                     payload.get("IBAN"),
                     "", // TODO: ?
                     c1.getPays(),
                     new BigDecimal(1),
                     "dummy"
             );
-            // TODO: à faire fonctionner
-            float f =Float.parseFloat(String.valueOf(this.getMontant(c1.getPays(),c2.getPays(),new BigDecimal(payload.get("montant"))))); // TODO a changer
-            BigDecimal t = this.getTaux(c1.getPays(),c2.getPays());
+            // TODO: check status for taux ?
             Operation o2 = new Operation(
                     "dummy2",
                     payload.get("dateheure"),
                     "Transfert de "+c1.getIban(),
-                    f,
+                    this.getMontant(c1.getPays(),c2.getPays(),new BigDecimal(payload.get("montant"))),
                     c1.getIban(),
                     "",
                     c1.getPays(),
-                    t,
+                    this.getTaux(c1.getPays(),c2.getPays()),
                     "dummy"
             );
             // Création des opérations

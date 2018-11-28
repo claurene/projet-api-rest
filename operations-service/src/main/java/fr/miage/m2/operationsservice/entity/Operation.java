@@ -2,6 +2,7 @@ package fr.miage.m2.operationsservice.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @Entity
@@ -9,12 +10,18 @@ public class Operation {
     @Id
     private String id;
 
+    @NotNull // TODO: format
     private String dateheure;
+    @NotNull // ?
     private String libelle;
-    private float montant;
+    @NotNull
+    private BigDecimal montant;
+    @NotNull
     private BigDecimal taux;
+    @NotNull
     private String commercant;
     private String categorie;
+    @NotNull
     private String pays;
 
     private String compteid;
@@ -22,7 +29,7 @@ public class Operation {
     public Operation() {
     }
 
-    public Operation(String dateheure, String libelle, float montant, BigDecimal taux, String categorie, String commercant, String pays, String compteid) {
+    public Operation(String dateheure, String libelle, BigDecimal montant, BigDecimal taux, String categorie, String commercant, String pays, String compteid) {
         this.dateheure = dateheure;
         this.libelle = libelle;
         this.montant = montant;
@@ -41,11 +48,11 @@ public class Operation {
         this.libelle = libelle;
     }
 
-    public float getMontant() {
+    public BigDecimal getMontant() {
         return montant;
     }
 
-    public void setMontant(float montant) {
+    public void setMontant(BigDecimal montant) {
         this.montant = montant;
     }
 

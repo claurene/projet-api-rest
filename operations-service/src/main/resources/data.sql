@@ -1,3 +1,4 @@
-INSERT INTO operation (id,libelle,montant,compteid) VALUES ('1','test1',6.05,'1');
-INSERT INTO operation (id,libelle,montant,compteid) VALUES ('2','test2',3.95,'1');
-INSERT INTO operation (id,libelle,montant,compteid) VALUES ('3','test3',10.0,'2');
+INSERT INTO operation (id,dateheure,libelle,montant,taux,commercant,categorie,pays,compteid)
+VALUES ('m8hz','01/08/2018','Salaire 07/2018','1833.54','1.00','MIAGIC','Salaire','FR','2a55');
+INSERT INTO operation (id,dateheure,libelle,montant,taux,commercant,categorie,pays,compteid)
+VALUES ('tw9u','03/08/2018','Carrefour contact','-45.68','1.00','CARREFOUR','Alimentation','FR','2a55');
