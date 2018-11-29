@@ -21,7 +21,11 @@ public class BourseController {
 
         ValeurChange valeurChange = vcr.findBySourceAndCible(source, cible);
 
-        return valeurChange.getTauxConversion();
+        if (valeurChange == null) {
+            return null;
+        } else {
+            return valeurChange.getTauxConversion();
+        }
     }
 
     @GetMapping("/change-devise/source/{source}/cible/{cible}/quantite/{qte}")
@@ -29,7 +33,11 @@ public class BourseController {
 
         ValeurChange valeurChange = vcr.findBySourceAndCible(source, cible);
 
-        return qte.multiply(valeurChange.getTauxConversion());
+        if (valeurChange == null) {
+            return null;
+        } else {
+            return qte.multiply(valeurChange.getTauxConversion());
+        }
     }
 
 }

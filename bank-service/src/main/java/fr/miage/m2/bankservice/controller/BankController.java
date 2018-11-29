@@ -1,5 +1,7 @@
 package fr.miage.m2.bankservice.controller;
 
+import fr.miage.m2.bankservice.exception.CountryNotFoundException;
+import fr.miage.m2.bankservice.exception.DeviseNotFoundException;
 import fr.miage.m2.bankservice.model.Carte;
 import fr.miage.m2.bankservice.model.Operation;
 import fr.miage.m2.bankservice.model.PaysDevise;
@@ -113,12 +115,15 @@ public class BankController {
         // Note : empeche opération de fonctionner si le service compte n'est pas disponible
         try {
             Compte c1 = compteClient.getCompteAsObject(compteId);
+            try {
+                operation.setTaux(this.getTaux(operation.getPays(),c1.getPays()));
+                BigDecimal f =  this.getMontant(operation.getPays(),c1.getPays(),operation.getMontant());
+                operation.setMontant(new BigDecimal(f.toString()));
 
-            operation.setTaux(this.getTaux(operation.getPays(),c1.getPays()));
-            BigDecimal f =  this.getMontant(operation.getPays(),c1.getPays(),operation.getMontant());
-            operation.setMontant(new BigDecimal(f.toString())); // TODO: change montant type ?
-
-            return operationClient.postOperation(compteId,new HttpEntity<>(operation));
+                return operationClient.postOperation(compteId,new HttpEntity<>(operation));
+            } catch (CountryNotFoundException | DeviseNotFoundException e) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
         } catch (HttpClientErrorException e) {
             // Gère le 404 et le 500 (compte not found / service unavailable)
             return new ResponseEntity<>(e.getStatusCode());
@@ -150,28 +155,32 @@ public class BankController {
                     new BigDecimal(1),
                     "dummy"
             );
-            // TODO: check status for taux ?
-            Operation o2 = new Operation(
-                    "dummy2",
-                    payload.get("dateheure"),
-                    "Transfert de "+c1.getIban(),
-                    this.getMontant(c1.getPays(),c2.getPays(),new BigDecimal(payload.get("montant"))),
-                    c1.getIban(),
-                    "",
-                    c1.getPays(),
-                    this.getTaux(c1.getPays(),c2.getPays()),
-                    "dummy"
-            );
-            // Création des opérations
-            ResponseEntity<?> res1 = operationClient.postOperation(compteId,new HttpEntity<>(o1));
-            if (res1.getStatusCode().equals(HttpStatus.CREATED)) {
-                ResponseEntity<?> res2 = operationClient.postOperation(id2,new HttpEntity<>(o2));
-                // TODO: better check ?
-                return new ResponseEntity<>(res2.getStatusCode());
-            } else {
-                return new ResponseEntity<>(res1.getStatusCode());
+            try {
+                Operation o2 = new Operation(
+                        "dummy2",
+                        payload.get("dateheure"),
+                        "Transfert de "+c1.getIban(),
+                        this.getMontant(c1.getPays(),c2.getPays(),new BigDecimal(payload.get("montant"))),
+                        c1.getIban(),
+                        "",
+                        c1.getPays(),
+                        this.getTaux(c1.getPays(),c2.getPays()),
+                        "dummy"
+                );
+                // Création des opérations
+                ResponseEntity<?> res1 = operationClient.postOperation(compteId,new HttpEntity<>(o1));
+                if (res1.getStatusCode().equals(HttpStatus.CREATED)) {
+                    ResponseEntity<?> res2 = operationClient.postOperation(id2,new HttpEntity<>(o2));
+                    // TODO: better check ?
+                    return new ResponseEntity<>(res2.getStatusCode());
+                } else {
+                    return new ResponseEntity<>(res1.getStatusCode());
+                }
+                // TODO: headers id location ??
+            } catch (CountryNotFoundException | DeviseNotFoundException e) {
+                e.printStackTrace(); //TODO: msg d'erreur ?
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            // TODO: headers id location ??
         } catch (HttpClientErrorException e) {
             return new ResponseEntity<>(e.getStatusCode());
         }
@@ -179,9 +188,7 @@ public class BankController {
 
     ///// Private /////
 
-    // TODO: fix pays not found ? new exception ?
-
-    private BigDecimal getTaux(String pays1, String pays2){
+    private BigDecimal getTaux(String pays1, String pays2) throws CountryNotFoundException, DeviseNotFoundException {
         BigDecimal taux = new BigDecimal(1);
         if (!pays1.equals(pays2)) {
             Optional<PaysDevise> opt1 = pdr.findByPays(pays1);
@@ -190,14 +197,17 @@ public class BankController {
                 String source = opt1.get().getDevise();
                 String cible = opt2.get().getDevise();
                 taux = bourseClient.getValeurDeChange(source, cible);
-            } else { // TODO: else throws pays not found exception ?
-                System.out.println("ATTENTION: pays not found ! taux = 1");
+                if (taux == null) {
+                    throw new DeviseNotFoundException();
+                }
+            } else {
+                throw new CountryNotFoundException();
             }
         }
         return taux;
     }
 
-    private BigDecimal getMontant(String pays1, String pays2, BigDecimal qte){
+    private BigDecimal getMontant(String pays1, String pays2, BigDecimal qte) throws CountryNotFoundException, DeviseNotFoundException {
         BigDecimal montant = qte;
         if (!pays1.equals(pays2)) {
             Optional<PaysDevise> opt1 = pdr.findByPays(pays1);
@@ -206,8 +216,11 @@ public class BankController {
                 String source = opt1.get().getDevise();
                 String cible = opt2.get().getDevise();
                 montant = bourseClient.getMontant(source, cible, qte);
-            } else { // TODO: else throws pays not found exception ?
-                System.out.println("ATTENTION: pays not found ! taux = 1");
+                if (montant == null) {
+                    throw new DeviseNotFoundException();
+                }
+            } else {
+                throw new CountryNotFoundException();
             }
         }
         return montant;
