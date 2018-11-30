@@ -1,5 +1,6 @@
 package fr.miage.m2.bankservice.proxy;
 
+import com.netflix.discovery.EurekaClient;
 import fr.miage.m2.bankservice.controller.BankController;
 import fr.miage.m2.bankservice.model.Carte;
 import fr.miage.m2.bankservice.proxy.config.CarteConfig;
@@ -25,12 +26,16 @@ public class CarteClient {
     private final CarteConfig config;
     private final RestTemplate restTemplate;
 
+    private final EurekaClient eurekaClient; //autowirred
+
     private final String CARTES_URL;
 
-    public CarteClient(CarteConfig config, RestTemplateBuilder builder) {
+    public CarteClient(CarteConfig config, RestTemplateBuilder builder, EurekaClient eurekaClient) {
         this.config = config;
         this.restTemplate = builder.build(); // no bean needed
-        this.CARTES_URL = config.getUrl()+":"+config.getPort()+"/comptes/{compteId}/cartes";
+        //this.CARTES_URL = config.getUrl()+":"+config.getPort()+"/comptes/{compteId}/cartes";
+        this.eurekaClient = eurekaClient;
+        this.CARTES_URL = eurekaClient.getNextServerFromEureka("cartes-service",false).getHomePageUrl()+"/comptes/{compteId}/cartes"; // false for security
     }
 
     // GET all cartes

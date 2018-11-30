@@ -1,5 +1,6 @@
 package fr.miage.m2.bankservice.controller;
 
+import com.netflix.discovery.EurekaClient;
 import fr.miage.m2.bankservice.exception.CountryNotFoundException;
 import fr.miage.m2.bankservice.exception.DeviseNotFoundException;
 import fr.miage.m2.bankservice.model.Carte;
@@ -11,8 +12,6 @@ import fr.miage.m2.bankservice.model.Compte;
 import fr.miage.m2.bankservice.proxy.CompteClient;
 import fr.miage.m2.bankservice.proxy.OperationClient;
 import fr.miage.m2.bankservice.repository.PaysDeviseRepository;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Controller
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
