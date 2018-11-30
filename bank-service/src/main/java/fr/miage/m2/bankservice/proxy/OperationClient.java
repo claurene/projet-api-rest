@@ -1,8 +1,8 @@
 package fr.miage.m2.bankservice.proxy;
 
+import com.netflix.discovery.EurekaClient;
 import fr.miage.m2.bankservice.controller.BankController;
 import fr.miage.m2.bankservice.model.Operation;
-import fr.miage.m2.bankservice.proxy.config.OperationConfig;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -24,15 +24,18 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Component
 public class OperationClient {
 
-    private final OperationConfig config;
+    //private final OperationConfig config;
     private final RestTemplate restTemplate;
 
-    private final String OPERATIONS_URL;
+    private final EurekaClient eurekaClient;
 
-    public OperationClient(OperationConfig config, RestTemplateBuilder builder) {
-        this.config = config;
+    private final String OPERATIONS_URL = "/comptes/{compteId}/operations";
+
+    public OperationClient(RestTemplateBuilder builder, EurekaClient eurekaClient) {
+        //this.config = config;
         this.restTemplate = builder.build(); // no bean needed
-        this.OPERATIONS_URL = config.getUrl()+":"+config.getPort()+"/comptes/{compteId}/operations";
+        //this.getUrl()+OPERATIONS_URL = config.getUrl()+":"+config.getPort()+"/comptes/{compteId}/operations";
+        this.eurekaClient = eurekaClient;
     }
 
     // GET all operations
@@ -53,7 +56,7 @@ public class OperationClient {
         if (pays.isPresent()) {
             params.add("pays="+pays.get());
         }
-        String url = OPERATIONS_URL+"?";
+        String url = getUrl()+OPERATIONS_URL+"?";
         url+= params.stream().collect(Collectors.joining("&"));
         Operation[] res = this.restTemplate.getForObject(url,Operation[].class,compteId);
         return new ResponseEntity<>(operationsToResource(res,compteId), HttpStatus.OK);
@@ -61,13 +64,13 @@ public class OperationClient {
 
     // GET one operation
     public ResponseEntity<?> fetchOperation (String compteId, String operationId){
-        Operation operation = this.restTemplate.getForObject(OPERATIONS_URL +"/{operationId}",Operation.class,compteId,operationId);
+        Operation operation = this.restTemplate.getForObject(getUrl()+OPERATIONS_URL +"/{operationId}",Operation.class,compteId,operationId);
         return new ResponseEntity<>(operationToResource(operation,compteId,operationId),HttpStatus.OK);
     }
 
     // POST one operation
     public ResponseEntity<?> postOperation (String compteId, HttpEntity<Operation> entity){
-        URI uri = this.restTemplate.postForLocation(OPERATIONS_URL, entity, compteId);
+        URI uri = this.restTemplate.postForLocation(getUrl()+OPERATIONS_URL, entity, compteId);
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(linkTo(BankController.class).slash(uri.getPath()).toUri()); //TODO: remove '/comptes' from controller uri (or use another class)
         return new ResponseEntity<>(null,headers,HttpStatus.CREATED);
@@ -76,7 +79,7 @@ public class OperationClient {
     // GET solde
     public ResponseEntity<?> getSolde (String compteId) {
         // TODO: response entity + add HATEOAS links
-        return this.restTemplate.getForEntity(OPERATIONS_URL + "/solde", String.class, compteId);
+        return this.restTemplate.getForEntity(getUrl()+OPERATIONS_URL + "/solde", String.class, compteId);
     }
 
     // Méthodes ToResource
@@ -98,6 +101,9 @@ public class OperationClient {
         return new Resources<>(res,selfLink);
     }
 
+    private String getUrl(){
+        return eurekaClient.getNextServerFromEureka("operations-service",false).getHomePageUrl();
+    }
 
 
 }
