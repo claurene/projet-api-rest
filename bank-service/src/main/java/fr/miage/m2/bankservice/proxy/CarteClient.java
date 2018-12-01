@@ -38,7 +38,6 @@ public class CarteClient {
 
     // GET all cartes
     public ResponseEntity<?> fetchCartes(String compteId){
-        //TODO: fix liens HATEOAS
         Carte[] res = this.restTemplate.getForObject(getUrl()+CARTES_URL,Carte[].class,compteId);
         return new ResponseEntity<>(cartesToResource(res,compteId),HttpStatus.OK);
     }
@@ -72,11 +71,13 @@ public class CarteClient {
     }
 
     // Méthodes private
-    // TODO add links with rel ?
 
     private Resource<?> carteToResource(Carte carte, String compteId, String carteId) {
         Link selfLink = linkTo(methodOn(BankController.class).getCarte(compteId,carteId)).withSelfRel();
-        return new Resource<>(carte, selfLink);
+        Resource res = new Resource<>(carte,selfLink);
+        res.add(linkTo(methodOn(BankController.class).getAllCartes(compteId)).withRel("cartes"));
+        res.add(linkTo(methodOn(BankController.class).getCompte(compteId)).withRel("compte"));
+        return res;
     }
 
     private Resources<?> cartesToResource(Carte[] cartes, String compteId) {

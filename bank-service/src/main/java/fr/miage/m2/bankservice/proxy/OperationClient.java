@@ -39,12 +39,10 @@ public class OperationClient {
     }
 
     // GET all operations
-    // TODO: filter parameter
     public ResponseEntity<?> fetchOperations(String compteId,
                                              Optional<String> categorie,
                                              Optional<String> commercant,
                                              Optional<String> pays){
-        //TODO: fix liens HATEOAS
         // Filtering
         ArrayList<String> params = new ArrayList<>();
         if (categorie.isPresent()) {
@@ -72,26 +70,25 @@ public class OperationClient {
     public ResponseEntity<?> postOperation (String compteId, HttpEntity<Operation> entity){
         URI uri = this.restTemplate.postForLocation(getUrl()+OPERATIONS_URL, entity, compteId);
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(linkTo(BankController.class).slash(uri.getPath()).toUri()); //TODO: remove '/comptes' from controller uri (or use another class)
+        headers.setLocation(linkTo(BankController.class).slash(uri.getPath()).toUri());
         return new ResponseEntity<>(null,headers,HttpStatus.CREATED);
     }
 
     // GET solde
     public ResponseEntity<?> getSolde (String compteId) {
-        // TODO: response entity + add HATEOAS links
+        // TODO: response entity + add HATEOAS links ?
         return this.restTemplate.getForEntity(getUrl()+OPERATIONS_URL + "/solde", String.class, compteId);
     }
 
-    // Méthodes ToResource
+    // Méthodes private
 
     private Resource<?> operationToResource(Operation operation, String compteId, String operationId) {
         Link selfLink = linkTo(methodOn(BankController.class).getOperation(compteId,operationId)).withSelfRel();
-        // TODO: voir si utile d'ajouter d'autres liens HATEOAS
-        /*Resource res = new Resource<>(operation, selfLink);
-        res.add(linkTo(methodOn(CompteController.class).getAllOperations(compteId,null,null,null)).withRel("operations"));
-        res.add(linkTo(methodOn(CompteController.class).getCompte(compteId)).withRel("compte"));
-        return res;*/
-        return new Resource<>(operation, selfLink);
+        Resource res = new Resource<>(operation, selfLink);
+        res.add(linkTo(methodOn(BankController.class).getAllOperations(compteId,null,null,null)).withRel("operations"));
+        res.add(linkTo(methodOn(BankController.class).getCompte(compteId)).withRel("compte"));
+        return res;
+        //return new Resource<>(operation, selfLink);
     }
 
     private Resources<?> operationsToResource(Operation[] operations, String compteId) {

@@ -44,6 +44,9 @@ public class BankController {
         this.bourseClient = bourseClient;
     }
 
+    // TODO : swagger url ?
+    // @RequestMapping("/swagger") return "redirect:/swagger-ui.html";
+
     ///// Comptes /////
 
     // GET one compte // TODO GET BY iban instead of ID ?
@@ -53,7 +56,7 @@ public class BankController {
     }
 
     // POST compte
-    @PostMapping
+    @PostMapping(value = "/comptes")
     public ResponseEntity<?> newCompte(@RequestBody Compte compte) {
         return compteClient.postCompte(new HttpEntity<>(compte));
     }
