@@ -1,18 +1,12 @@
 package fr.miage.m2.bankservice.controller;
 
-import com.netflix.discovery.EurekaClient;
 import fr.miage.m2.bankservice.exception.CountryNotFoundException;
 import fr.miage.m2.bankservice.exception.DeviseNotFoundException;
-import fr.miage.m2.bankservice.model.Carte;
-import fr.miage.m2.bankservice.model.Operation;
-import fr.miage.m2.bankservice.model.PaysDevise;
-import fr.miage.m2.bankservice.proxy.BourseClient;
-import fr.miage.m2.bankservice.proxy.CarteClient;
-import fr.miage.m2.bankservice.model.Compte;
-import fr.miage.m2.bankservice.proxy.CompteClient;
-import fr.miage.m2.bankservice.proxy.OperationClient;
+import fr.miage.m2.bankservice.model.*;
+import fr.miage.m2.bankservice.proxy.*;
 import fr.miage.m2.bankservice.repository.PaysDeviseRepository;
 import org.springframework.http.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
@@ -20,8 +14,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
-
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 @Controller
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -35,17 +27,38 @@ public class BankController {
     private final CompteClient compteClient;
     private final OperationClient operationClient;
     private final BourseClient bourseClient;
+    private final AuthClient authClient;
 
-    public BankController(PaysDeviseRepository pdr, CarteClient carteClient, CompteClient compteClient, OperationClient operationClient, BourseClient bourseClient) {
+    public BankController(PaysDeviseRepository pdr, CarteClient carteClient, CompteClient compteClient, OperationClient operationClient, BourseClient bourseClient, AuthClient authClient) {
         this.pdr = pdr;
         this.carteClient = carteClient;
         this.compteClient = compteClient;
         this.operationClient = operationClient;
         this.bourseClient = bourseClient;
+        this.authClient = authClient;
     }
 
     // TODO : swagger url ?
     // @RequestMapping("/swagger") return "redirect:/swagger-ui.html";
+
+    ///// Security /////
+
+    @PostMapping(value = "/sign-up")
+    public ResponseEntity<?> signUp(@RequestBody User user){
+        return this.authClient.signUp(new HttpEntity<>(user));
+    }
+
+    @PostMapping(value = "/login")
+    public ResponseEntity<?> login(@RequestBody User user){
+        return this.authClient.login(new HttpEntity<>(user));
+    }
+
+    // TODO: debug
+    @GetMapping(value = "/comptes")
+    public ResponseEntity<?> hello(){
+        System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal()); //TODO: debug
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     ///// Comptes /////
 
