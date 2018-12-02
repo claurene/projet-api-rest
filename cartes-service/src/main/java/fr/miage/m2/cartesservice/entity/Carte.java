@@ -13,14 +13,13 @@ public class Carte {
     private String id;
 
     @NotNull
-    @Size(min=16,max=16)
-    @Column(unique = true)
+    @Column(unique = true, length = 16)
     private String numcarte;
     @NotNull
-    @Size(min=4,max=4)
+    @Column(length = 16)
     private String code;
     @NotNull
-    @Size(min=3,max=3)
+    @Column(length = 16)
     private String cryptogramme;
     @NotNull
     private boolean bloquee;
@@ -73,14 +72,6 @@ public class Carte {
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public String getCompteId() {
-        return compteid;
-    }
-
-    public void setCompteId(String compteId) {
-        this.compteid = compteId;
     }
 
     public String getCryptogramme() {

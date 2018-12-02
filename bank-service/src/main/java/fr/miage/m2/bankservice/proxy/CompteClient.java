@@ -38,6 +38,7 @@ public class CompteClient {
     // GET one compte
     public ResponseEntity<?> fetchCompte (String compteId){
         Compte compte = getCompteAsObject(compteId);
+        compte.setId(compteId); // Spring boot ne peut pas exposer l'id
         return new ResponseEntity<>(compteToResource(compte,compteId), HttpStatus.OK);
     }
 

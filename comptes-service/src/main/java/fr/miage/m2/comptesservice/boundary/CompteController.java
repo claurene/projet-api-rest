@@ -1,7 +1,6 @@
 package fr.miage.m2.comptesservice.boundary;
 
 import fr.miage.m2.comptesservice.entity.Compte;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -53,7 +51,7 @@ public class CompteController {
     // POST compte
     @PostMapping
     public ResponseEntity<?> newCompte(@RequestBody Compte compte) {
-        compte.setId(UUID.randomUUID().toString()); // Donne un nouvel identifiant
+        //compte.setId(UUID.randomUUID().toString());
         Compte saved = cr.save(compte); // Fait persister le compte
         HttpHeaders responseHeader = new HttpHeaders(); // Génère un nouveau header pour la réponse
         responseHeader.setLocation(linkTo(methodOn(CompteController.class).getCompte(saved.getId())).toUri());

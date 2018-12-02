@@ -33,7 +33,6 @@ public class CarteController {
     public ResponseEntity<?> getAllCartesByCompteId(@PathVariable("compteId") String compteId) {
         Iterable<Carte> allCartes = cr.findAllByCompteid(compteId);
         return new ResponseEntity<>(allCartes, HttpStatus.OK);
-        // TODO: fix carteToResource(allCartes,compteId) for standalone mode
     }
 
 
@@ -49,8 +48,9 @@ public class CarteController {
     // POST (create)
     @PostMapping
     public ResponseEntity<?> newCarte(@PathVariable("compteId") String compteId, @RequestBody Carte carte) {
+        System.out.println(compteId);
         carte.setId(UUID.randomUUID().toString()); // Donne un nouvel identifiant
-        carte.setCompteId(compteId);
+        carte.setCompteid(compteId);
         Carte saved = cr.save(carte); // Fait persister l'carte
         HttpHeaders responseHeader = new HttpHeaders(); // Génère un nouveau header pour la réponse
         responseHeader.setLocation(linkTo(methodOn(CarteController.class).getCarte(compteId,saved.getId())).toUri());
@@ -58,7 +58,7 @@ public class CarteController {
     }
 
     // PUT (update)
-    // TODO: changer méthode ? pcq là ça remplace tout donc bof secure + champs null si pas toutes les infos sont envoyées -> PATCH ?
+    // TODO: several PATCH ?
     @PutMapping(value="/{carteId}")
     public ResponseEntity<?> putCarte(@RequestBody Carte carte, @PathVariable("compteId") String compteId, @PathVariable("carteId") String id) {
         // On change l'id afin de remplacer l'objet
@@ -70,7 +70,7 @@ public class CarteController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         carte.setId(id);
-        carte.setCompteId(compteId);
+        carte.setCompteid(compteId);
         Carte saved = cr.save(carte);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -98,7 +98,7 @@ public class CarteController {
 
     private Resource<Carte> carteToResource(Carte carte, Boolean collection, String compteId) {
         Link selfLink = linkTo(CarteRepository.class)
-                .slash(carte.getId()) //TODO: fix
+                .slash(carte.getId())
                 .withSelfRel();
         if (collection) {
             Link collectionLink = linkTo(methodOn(CarteController.class).getAllCartesByCompteId(compteId)).withSelfRel();

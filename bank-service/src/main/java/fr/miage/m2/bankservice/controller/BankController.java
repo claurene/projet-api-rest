@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.math.BigDecimal;
-import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -38,8 +37,10 @@ public class BankController {
         this.authClient = authClient;
     }
 
-    // TODO : swagger url ?
-    // @RequestMapping("/swagger") return "redirect:/swagger-ui.html";
+    @RequestMapping("/swagger")
+    public String swagger(){
+        return "redirect:/swagger-ui.html";
+    }
 
     ///// Security /////
 
@@ -53,24 +54,23 @@ public class BankController {
         return this.authClient.login(new HttpEntity<>(user));
     }
 
-    // TODO: debug
-    @GetMapping(value = "/comptes")
-    public ResponseEntity<?> hello(){
-        System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal()); //TODO: debug
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     ///// Comptes /////
 
     // GET one compte // TODO GET BY iban instead of ID ?
     @GetMapping(value = "/comptes/{compteId}")
     public ResponseEntity<?> getCompte(@PathVariable("compteId") String compteId) {
-        return compteClient.fetchCompte(compteId);
+        if (checkCompteId(compteId)) {
+            return compteClient.fetchCompte(compteId);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     // POST compte
     @PostMapping(value = "/comptes")
     public ResponseEntity<?> newCompte(@RequestBody Compte compte) {
+        // SET ID according to bearer token
+        compte.setId(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         return compteClient.postCompte(new HttpEntity<>(compte));
     }
     
@@ -79,31 +79,51 @@ public class BankController {
     // GET cartes
     @GetMapping(value = "/comptes/{compteId}/cartes")
     public ResponseEntity<?> getAllCartes(@PathVariable("compteId") String compteId) {
-        return carteClient.fetchCartes(compteId);
+        if (checkCompteId(compteId)) {
+            return carteClient.fetchCartes(compteId);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     // GET one carte // TODO GET BY numero instead of ID ?
     @GetMapping(value = "/comptes/{compteId}/cartes/{carteId}")
     public ResponseEntity<?> getCarte(@PathVariable("compteId") String compteId, @PathVariable("carteId") String carteId) {
-        return carteClient.fetchCarte(compteId,carteId);
+        if (checkCompteId(compteId)) {
+            return carteClient.fetchCarte(compteId,carteId);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     // POST new carte
     @PostMapping(value = "/comptes/{compteId}/cartes")
     public ResponseEntity<?> newCarte(@PathVariable("compteId") String compteId, @RequestBody Carte carte) {
-        return carteClient.postCarte(compteId,new HttpEntity<>(carte));
+        if (checkCompteId(compteId)) {
+            return carteClient.postCarte(compteId,new HttpEntity<>(carte));
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     // PUT update carte
     @PutMapping(value="/comptes/{compteId}/cartes/{carteId}")
     public ResponseEntity<?> putCarte(@RequestBody Carte carte, @PathVariable("compteId") String compteId, @PathVariable("carteId") String id) {
-        return carteClient.putCarte(compteId,id,new HttpEntity<>(carte));
+        if (checkCompteId(compteId)) {
+            return carteClient.putCarte(compteId,id,new HttpEntity<>(carte));
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     // DELETE carte
     @DeleteMapping(value="/comptes/{compteId}/cartes/{carteId}")
     public ResponseEntity<?> deleteCarte(@PathVariable("compteId") String compteId, @PathVariable("carteId") String id) {
-        return carteClient.deleteCarte(compteId,id);
+        if (checkCompteId(compteId)) {
+            return carteClient.deleteCarte(compteId,id);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     ////// Operations //////
@@ -114,93 +134,115 @@ public class BankController {
                                               @RequestParam("categorie") Optional<String> categorie,
                                               @RequestParam("commercant") Optional<String> commercant,
                                               @RequestParam("pays") Optional<String> pays ) {
-        return operationClient.fetchOperations(compteId,categorie,commercant,pays);
+        if (checkCompteId(compteId)) {
+            return operationClient.fetchOperations(compteId,categorie,commercant,pays);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     // GET one operation
     @GetMapping(value = "/comptes/{compteId}/operations/{operationId}")
     public ResponseEntity<?> getOperation(@PathVariable("compteId") String compteId, @PathVariable("operationId") String operationId) {
-        return operationClient.fetchOperation(compteId,operationId);
+        if (checkCompteId(compteId)) {
+            return operationClient.fetchOperation(compteId,operationId);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     // POST new operation
     @PostMapping(value = "/comptes/{compteId}/operations")
     public ResponseEntity<?> newOperation(@PathVariable("compteId") String compteId, @RequestBody Operation operation) {
-        // Note : empeche opération de fonctionner si le service compte n'est pas disponible
-        try {
-            Compte c1 = compteClient.getCompteAsObject(compteId);
+        if (checkCompteId(compteId)) {
+            // Note : empeche opération de fonctionner si le service compte n'est pas disponible
             try {
-                operation.setTaux(this.getTaux(operation.getPays(),c1.getPays()));
-                BigDecimal f =  this.getMontant(operation.getPays(),c1.getPays(),operation.getMontant());
-                operation.setMontant(new BigDecimal(f.toString()));
+                Compte c1 = compteClient.getCompteAsObject(compteId);
+                try {
+                    operation.setTaux(this.getTaux(operation.getPays(),c1.getPays()));
+                    BigDecimal f =  this.getMontant(operation.getPays(),c1.getPays(),operation.getMontant());
+                    operation.setMontant(new BigDecimal(f.toString()));
 
-                return operationClient.postOperation(compteId,new HttpEntity<>(operation));
-            } catch (CountryNotFoundException | DeviseNotFoundException e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                    return operationClient.postOperation(compteId,new HttpEntity<>(operation));
+                } catch (CountryNotFoundException | DeviseNotFoundException e) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+            } catch (HttpClientErrorException e) {
+                // Gère le 404 et le 500 (compte not found / service unavailable)
+                return new ResponseEntity<>(e.getStatusCode());
             }
-        } catch (HttpClientErrorException e) {
-            // Gère le 404 et le 500 (compte not found / service unavailable)
-            return new ResponseEntity<>(e.getStatusCode());
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
     // GET solde
     @GetMapping(value = "/comptes/{compteId}/solde")
     public ResponseEntity<?> getSolde(@PathVariable("compteId") String compteId) {
-        return operationClient.getSolde(compteId);
+        if (checkCompteId(compteId)) {
+            return operationClient.getSolde(compteId);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     // POST transfert
     @PostMapping(value = "/comptes/{compteId}/transfert")
-    public ResponseEntity<?> newTransfert(@PathVariable("compteId") String compteId, @RequestBody Map<String,String> payload) {
-        try {
-            Compte c1 = compteClient.getCompteAsObject(compteId);
-            String id2 = compteClient.getCompteIdByIban(payload.get("IBAN"));
-            Compte c2 = compteClient.getCompteAsObject(id2);
-            // Préparation des données à envoyer
-            Operation o1 = new Operation(
-                    "dummy",
-                    payload.get("dateheure"),
-                    "Transfert vers "+c2.getIban(),
-                    new BigDecimal(Float.parseFloat(payload.get("montant"))*-1),
-                    payload.get("IBAN"),
-                    "", // TODO: ?
-                    c1.getPays(),
-                    new BigDecimal(1),
-                    "dummy"
-            );
+    public ResponseEntity<?> newTransfert(@PathVariable("compteId") String compteId, @RequestBody Transfert payload) {
+        if (checkCompteId(compteId)) {
             try {
-                Operation o2 = new Operation(
-                        "dummy2",
-                        payload.get("dateheure"),
-                        "Transfert de "+c1.getIban(),
-                        this.getMontant(c1.getPays(),c2.getPays(),new BigDecimal(payload.get("montant"))),
-                        c1.getIban(),
-                        "",
+                Compte c1 = compteClient.getCompteAsObject(compteId);
+                String id2 = compteClient.getCompteIdByIban(payload.getIBAN());
+                Compte c2 = compteClient.getCompteAsObject(id2);
+                // Préparation des données à envoyer
+                Operation o1 = new Operation(
+                        "dummy",
+                        payload.getDateheure(),
+                        "Transfert vers "+c2.getIban(),
+                        new BigDecimal(Float.parseFloat(payload.getMontant())*-1),
+                        payload.getIBAN(),
+                        "", // TODO: ?
                         c1.getPays(),
-                        this.getTaux(c1.getPays(),c2.getPays()),
+                        new BigDecimal(1),
                         "dummy"
                 );
-                // Création des opérations
-                ResponseEntity<?> res1 = operationClient.postOperation(compteId,new HttpEntity<>(o1));
-                if (res1.getStatusCode().equals(HttpStatus.CREATED)) {
-                    ResponseEntity<?> res2 = operationClient.postOperation(id2,new HttpEntity<>(o2));
-                    // TODO: better check ?
-                    return new ResponseEntity<>(res2.getStatusCode());
-                } else {
-                    return new ResponseEntity<>(res1.getStatusCode());
+                try {
+                    Operation o2 = new Operation(
+                            "dummy2",
+                            payload.getDateheure(),
+                            "Transfert de "+c1.getIban(),
+                            this.getMontant(c1.getPays(),c2.getPays(),new BigDecimal(payload.getMontant())),
+                            c1.getIban(),
+                            "",
+                            c1.getPays(),
+                            this.getTaux(c1.getPays(),c2.getPays()),
+                            "dummy"
+                    );
+                    // Création des opérations
+                    ResponseEntity<?> res1 = operationClient.postOperation(compteId,new HttpEntity<>(o1));
+                    if (res1.getStatusCode().equals(HttpStatus.CREATED)) {
+                        ResponseEntity<?> res2 = operationClient.postOperation(id2,new HttpEntity<>(o2));
+                        // TODO: better check ?
+                        return new ResponseEntity<>(res2.getStatusCode());
+                    } else {
+                        return new ResponseEntity<>(res1.getStatusCode());
+                    }
+                    // TODO: headers id location ??
+                } catch (CountryNotFoundException | DeviseNotFoundException e) {
+                    e.printStackTrace(); //TODO: msg d'erreur ?
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
-                // TODO: headers id location ??
-            } catch (CountryNotFoundException | DeviseNotFoundException e) {
-                e.printStackTrace(); //TODO: msg d'erreur ?
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            } catch (HttpClientErrorException e) {
+                return new ResponseEntity<>(e.getStatusCode());
             }
-        } catch (HttpClientErrorException e) {
-            return new ResponseEntity<>(e.getStatusCode());
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
     ///// Private /////
+
+    ///// Conversion devise /////
 
     private BigDecimal getTaux(String pays1, String pays2) throws CountryNotFoundException, DeviseNotFoundException {
         BigDecimal taux = new BigDecimal(1);
@@ -238,5 +280,11 @@ public class BankController {
             }
         }
         return montant;
+    }
+
+    ///// Security /////
+
+    private boolean checkCompteId(String compteId) {
+        return SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals(compteId);
     }
 }

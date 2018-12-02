@@ -9,7 +9,8 @@ import javax.persistence.Id;
 import java.io.Serializable;
 
 public class Compte implements Serializable{
-    private final String id;
+
+    private String id;
 
     private final String nom;
     private final String prenom;
@@ -42,7 +43,7 @@ public class Compte implements Serializable{
         this.iban = iban;
     }
 
-    @JsonIgnore
+    //@JsonIgnore
     public String getId() {
         return id;
     }
@@ -80,5 +81,24 @@ public class Compte implements Serializable{
 
     public String getSecret() {
         return secret;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Compte{" +
+                "id='" + id + '\'' +
+                ", nom='" + nom + '\'' +
+                ", prenom='" + prenom + '\'' +
+                ", datenaissance='" + datenaissance + '\'' +
+                ", pays='" + pays + '\'' +
+                ", nopassport='" + nopassport + '\'' +
+                ", numtel='" + numtel + '\'' +
+                ", secret='" + secret + '\'' +
+                ", iban='" + iban + '\'' +
+                '}';
     }
 }

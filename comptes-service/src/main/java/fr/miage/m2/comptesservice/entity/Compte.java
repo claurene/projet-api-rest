@@ -37,7 +37,8 @@ public class Compte {
     public Compte() {
     }
 
-    public Compte(String nom, String prenom, String datenaissance, String pays, String nopassport, String numtel, String secret, String iban) {
+    public Compte(String id, String nom, String prenom, String datenaissance, String pays, String nopassport, String numtel, String secret, String iban) {
+        this.id = id;
         this.nom = nom;
         this.prenom = prenom;
         this.datenaissance = datenaissance;

@@ -15,9 +15,10 @@ public class ResourceServerConfig {
         @Override
         public void configure(HttpSecurity http) throws Exception {
             http.csrf().disable().authorizeRequests()
-                    .antMatchers(HttpMethod.POST,"/sign-up").permitAll()
-                    .antMatchers(HttpMethod.POST,"/login").permitAll()
-                    .antMatchers("/comptes").authenticated();
+                    .antMatchers(HttpMethod.GET,"/swagger").permitAll() // doc
+                    .antMatchers(HttpMethod.POST,"/sign-up").permitAll() // créer un nouvel utilisateur
+                    .antMatchers(HttpMethod.POST,"/login").permitAll() // s'authentifier
+                    .antMatchers("/comptes").authenticated(); // utilisation de l'API
         }
     }
 

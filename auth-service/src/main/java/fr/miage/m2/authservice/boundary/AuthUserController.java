@@ -32,13 +32,18 @@ public class AuthUserController {
         applicationUserRepository.save(user);
     }
 
+    // Remarque : login déjà implémenté via spring security, faire POST avec les credentials
+
     // Connexion avec spring oauth2 security
     @GetMapping("/users/me")
     public Principal user(Principal principal) {
         return principal;
     }
 
-    // Remarque : login déjà implémenté via spring security, faire POST avec les credentials
-
-
+    // debug uniquement
+    /*@GetMapping("/users")
+    public ResponseEntity<?> getAllApplicationuser(){
+        Iterable<AuthUser> allUsers = applicationUserRepository.findAll();
+        return new ResponseEntity<>(allUsers, HttpStatus.OK);
+    }*/
 }

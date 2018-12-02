@@ -67,28 +67,5 @@ public class OperationController {
     public String getSolde(@PathVariable("compteId") String compteId) {
         return ""+or.findSoldeByCompteid(compteId);
     }
-
-    // Méthodes ToResource
-
-    /*private Resources<Resource<Operation>> operationToResource(Iterable<Operation> operations, String compteId) {
-        Link selfLink = linkTo(methodOn(OperationController.class).getAllOperationsByCompteId(compteId,null,null,null)).withSelfRel();
-        // Liens référencant chaque operation dans la collection
-        List<Resource<Operation>> operationResources = new ArrayList<>();
-        operations.forEach(operation ->
-                operationResources.add(operationToResource(operation, false,compteId)));
-        return new Resources<>(operationResources, selfLink);
-    }
-
-    private Resource<Operation> operationToResource(Operation operation, Boolean collection, String compteId) {
-        Link selfLink = linkTo(OperationRepository.class)
-                .slash(operation.getId()) //TODO: fix
-                .withSelfRel();
-        if (collection) {
-            Link collectionLink = linkTo(methodOn(OperationController.class).getAllOperationsByCompteId(compteId,null,null,null)).withSelfRel();
-            return new Resource<>(operation, selfLink, collectionLink);
-        } else {
-            return new Resource<>(operation, selfLink);
-        }
-    }*/
     
 }
