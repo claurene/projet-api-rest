@@ -1,0 +1,657 @@
+{
+	"info": {
+		"_postman_id": "16d443bc-caa4-456b-860c-fe39fbb14caa",
+		"name": "Bank API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Security",
+			"item": [
+				{
+					"name": "SIGN UP as laurene",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"username\":\"laurene\",\"password\":\"secret\"}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/sign-up",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"sign-up"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LOGIN as lulu",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"username\":\"lulu\",\"password\":\"secret\"}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LOGIN as estelle",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"username\":\"estelle\",\"password\":\"secret\"}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Compte",
+			"item": [
+				{
+					"name": "GET  compte",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET solde",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55/solde",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55",
+								"solde"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST compte",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1NjQ5YmQzOC05ZTY5LTQxMDgtOTY3Ni0wZDcxNmNjMmY1YzEiLCJleHAiOjE1NDQ2MjU4NDd9.cbF9xXdi3lIpA3NgVUdEdyr1bbhRdD8Klq2qYhuXaoZzd0CUQ-PBhr5ExlU1w-_z8UaBMm2l4vYqMAC1LgFXlg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"nom\": \"Cladt\",\n\"prenom\": \"Laurene\",\n\"datenaissance\": \"18/11/1996\",\n\"pays\": \"FR\",\n\"nopassport\": \"435854534\",\n\"numtel\": \"0033709876543\",\n\"secret\": \"secretlaurene\",\n\"iban\": \"132398023186696245271215096\"}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/comptes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes"
+							]
+						},
+						"description": "as laurene"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cartes",
+			"item": [
+				{
+					"name": "GET cartes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55/cartes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55",
+								"cartes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET carte",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55/cartes/3c6d7d10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55",
+								"cartes",
+								"3c6d7d10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST carte",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"numcarte\": \"2032300528194362\",\n\"code\": \"4530\",\n\"cryptogramme\": \"793\",\n\"bloquee\": false,\n\"localisation\": true,\n\"plafond\": -1000,\n\"sanscontact\": false,\n\"virtuelle\": false}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55/cartes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55",
+								"cartes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT carte",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"numcarte\": \"0822376073983937\",\n\"code\": \"8902\",\n\"cryptogramme\": \"870\",\n\"bloquee\": false,\n\"localisation\": true,\n\"plafond\": -1000,\n\"sanscontact\": false,\n\"virtuelle\": false}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55/cartes/3c6d7d10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55",
+								"cartes",
+								"3c6d7d10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE carte",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55/cartes/3c6d7d10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55",
+								"cartes",
+								"3c6d7d10"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Operations",
+			"item": [
+				{
+					"name": "GET operations",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55/operations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55",
+								"operations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET operation",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55/operations/m8hz",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55",
+								"operations",
+								"m8hz"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST operation",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"dateheure\":\"10/09/2017\",\n\t\"libelle\":\"E.Leclerc Varennes\",\n\t\"montant\":\"-53.85\",\n\t\"commercant\":\"E.LECLERC\",\n\t\"categorie\":\"Alimentaire\",\n\t\"pays\":\"FR\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55/operations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55",
+								"operations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST operation USA",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"dateheure\":\"10/09/2017\",\n\t\"libelle\":\"Target NYC\",\n\t\"montant\":\"-50.00\",\n\t\"commercant\":\"TARGET\",\n\t\"categorie\":\"Alimentaire\",\n\t\"pays\":\"USA\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55/operations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55",
+								"operations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST transfert",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyYTU1IiwiZXhwIjoxNTQ0NjI1Nzg3fQ.tZ61bWCQnqo6BtAQjk_iNWIt3KEQ-afkyDoGQNu0mmHQa5jHoFzEDpd8wvYkbA4RmvUTU9WZYDu_WvngvuPhRw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"dateheure\":\"10/09/2018\",\"montant\":\"800.54\",\"iban\":\"424878040273384305867791534\"}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/comptes/2a55/transfert",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"2a55",
+								"transfert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET operations (estelle)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkNmY0IiwiZXhwIjoxNTQ0NjI4NjU0fQ._aJWs60ldZkKDfBnnQ3FKs5QwQcQ5HjQuRCkvrSgr6CvNDq3iS3FuDE7ZGqdRozIlqFlnwswR0D5XVHWbhHzsg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:8080/comptes/d6f4/operations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"comptes",
+								"d6f4",
+								"operations"
+							]
+						},
+						"description": "à executer après le transfert"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
